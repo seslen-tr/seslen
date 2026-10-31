@@ -1,0 +1,156 @@
+# Seslendirme sınavı (16.10): eğitim verisinde geçmeyen, zor durumları kapsayan cümleler. kategori<TAB>cümle
+# sy sayı/tarih/saat/para/ölçü · ad kişi ve yer adları · so soru · em emir/yasak/uyarı · hi hitap · ku kısa/ünlem
+# ma masal/anlatı · ur ürün (harita, ölçüm) · zo zor sözcükler (uzun ünlü, ince l, yabancı kökenli) · du duygulu
+sy	Toplantı 14 Mart 2027 Pazartesi günü saat 09.30'da başlayacak.
+sy	Bu arsanın yüzölçümü 1.250 metrekare, imar durumu konut alanı.
+sy	Fiyatı 3.499,90 TL'den 2.750 TL'ye düştü.
+sy	Otobüs 17.45'te kalkıyor, yolculuk yaklaşık 3,5 saat sürecek.
+sy	Nüfus 2010'da 85 bin iken bugün 132 bine ulaştı.
+sy	Sıcaklık gece eksi 4 dereceye kadar düşebilir.
+sy	Lütfen 0532 418 27 63 numaralı telefonu arayın.
+sy	Parselin ada numarası 1047, parsel numarası 12.
+sy	Yarışmada 3. olan takım 1.500 lira ödül aldı.
+sy	Kitabın 247. sayfasında, 5. paragrafta bu konu anlatılıyor.
+sy	Hız sınırı saatte 50 kilometre, ihlal edenlere 1.952 lira ceza var.
+sy	Kahvaltı 07.00 ile 10.30 arasında veriliyor.
+sy	Bu yıl yağış ortalaması yüzde 18 arttı.
+sy	Cumhuriyet 29 Ekim 1923'te ilan edildi.
+sy	Ölçüm sonucu 12,75 hektar, hata payı artı eksi 0,3.
+sy	Saat tam 12'de buluşalım, gecikirsen 5 dakika beklerim.
+sy	Dağın yüksekliği 3.917 metre, zirveye 2 günde çıkılıyor.
+sy	1/1000 ölçekli imar planında yol genişliği 15 metre.
+sy	Hesabınızdan 245,60 lira çekildi.
+sy	Yeni dönem 1 Eylül'de başlıyor, kayıtlar 20 Ağustos'ta bitiyor.
+ad	Ayşegül ile Mehmet Ali dün Üsküdar'dan Kadıköy'e vapurla geçtiler.
+ad	Erzincan'dan Gümüşhane'ye giden yol kış aylarında sık sık kapanıyor.
+ad	Kahramanmaraş'ın dondurması, Afyonkarahisar'ın kaymağı meşhurdur.
+ad	Şebnem Hanım, Çağrı Bey'le birlikte Diyarbakır'a taşındı.
+ad	Michael Jackson'ın şarkıları hâlâ çok seviliyor.
+ad	Toplantıya Johannes, Sophie ve Kenji de katıldı.
+ad	Kızılırmak, Türkiye'nin en uzun ırmağıdır.
+ad	Ilgaz Dağı'nda kayak merkezi açıldı.
+ad	Gökçeada ile Bozcaada arasında feribot seferleri başladı.
+ad	İğdır'daki Ağrı Dağı manzarası insanı büyülüyor.
+ad	Doktor Oğuzhan Yıldırım hastaneye yeni atandı.
+ad	Sapanca Gölü'nün çevresinde yürüyüş yolu yapıldı.
+ad	Ünal'ın kızı Ece, Özge'nin oğlu Çınar'la aynı sınıfta.
+ad	Ankara Üniversitesi'nin kütüphanesi hafta sonu da açık.
+ad	Şanlıurfa'dan Mardin'e kadar bütün kervansarayları gezdik.
+so	Bu akşam yemekte ne pişirsek?
+so	Haritada en yakın eczaneyi gösterebilir misin?
+so	Neden bu kadar geç kaldınız?
+so	Yarın yağmur yağacak mı, şemsiye alayım mı?
+so	Hangi otobüs şehir merkezine gidiyor?
+so	Kaç kişilik rezervasyon yapmamı istersiniz?
+so	Sen de bizimle sinemaya gelir misin?
+so	Bu parselin sahibi kim, biliyor musunuz?
+so	Ödevini bitirdin mi, yoksa hâlâ oyun mu oynuyorsun?
+so	Peki, şimdi ne yapacağız?
+so	Bu kitabı daha önce okumuş muydun?
+so	Toplantı kaçta bitecek?
+so	Hiç deniz kenarında güneşin doğuşunu izledin mi?
+so	Bana bir bardak su verebilir misiniz?
+so	Nereden geldiğini söylemeyecek misin?
+em	Kapıyı kapatmadan çıkma.
+em	Lütfen telefonlarınızı sessize alın.
+em	Ocağın üstündeki tencereye dokunmayın, çok sıcak!
+em	Sağa dönün, ardından iki yüz metre düz devam edin.
+em	Dikkat! Zemin ıslak, kayabilirsiniz.
+em	Şifrenizi kimseyle paylaşmayın.
+em	Hemen buraya gel ve şunu gör!
+em	Asansörü yangın sırasında kullanmayınız.
+em	Ellerini yıkamadan yemeğe oturma.
+em	Bu alana izinsiz girmek yasaktır.
+em	Kemerlerinizi bağlayın, uçak inişe geçiyor.
+em	Sessiz ol, bebek uyuyor.
+em	Raporu cumaya kadar mutlaka gönderin.
+em	Köprüden geçerken hızınızı düşürün.
+em	Bir daha bunu yapma, anladın mı?
+hi	Kaan, çantanı masanın üstünde unutmuşsun.
+hi	Elif, annen seni aşağıda bekliyor.
+hi	Sevgili dinleyiciler, programımıza hoş geldiniz.
+hi	Murat, lütfen ışıkları kapatır mısın?
+hi	Hocam, ödevi yarın getirsem olur mu?
+hi	Anneciğim, seni çok özledim.
+hi	Çocuklar, teneffüs bitti, sınıfa dönün!
+hi	Efendim, siparişiniz hazır.
+hi	Zeynep, bu çizim gerçekten harika olmuş!
+hi	Arkadaşlar, bugün çok önemli bir haberim var.
+ku	Merhaba!
+ku	Harika!
+ku	Evet.
+ku	Hayır!
+ku	Tamam, anladım.
+ku	Teşekkürler.
+ku	Eyvah!
+ku	Olur mu öyle şey?
+ku	Günaydın!
+ku	Aferin sana!
+ku	Hadi bakalım!
+ku	Çok yaşa!
+ku	Hoşça kal.
+ku	Maalesef.
+ku	Vay canına!
+ku	İyi geceler.
+ku	Kolay gelsin.
+ku	Geçmiş olsun.
+ma	Bir varmış bir yokmuş, uzak diyarlarda bir padişah yaşarmış.
+ma	Küçük tavşan, ormanın derinliklerinde kaybolmuş ve ağlamaya başlamış.
+ma	Dev, kocaman ayaklarıyla yürüdükçe yer gök sarsılırmış.
+ma	Kurnaz tilki, kargaya tatlı tatlı sözler söylemiş.
+ma	Ninesi ona her gece başka bir masal anlatırmış.
+ma	Sonunda prenses, sihirli aynanın sırrını çözmüş.
+ma	Gökten üç elma düşmüş: biri bana, biri anlatana, biri de dinleyene.
+ma	Yaşlı balıkçı, sabaha karşı denize açılmış.
+ma	Rüzgâr esmiş, yapraklar dans etmiş, çocuklar gülüşmüş.
+ma	Ve o günden sonra hep birlikte mutlu yaşamışlar.
+ur	Seçtiğiniz parselin alanı ölçüldü, sonuç ekranda gösteriliyor.
+ur	Katman listesinden uydu görüntüsünü açabilirsiniz.
+ur	Rota hesaplanıyor, lütfen bekleyin.
+ur	Bu bölgede imar planı değişikliği askıya çıkarıldı.
+ur	Ölçüm aracıyla iki nokta arasındaki mesafeyi bulabilirsiniz.
+ur	Harita verileri en son dün gece güncellendi.
+ur	Koordinatları girin, konum haritada işaretlensin.
+ur	Sorgu sonucunda on iki parsel bulundu.
+ur	Eğim analizi tamamlandı, riskli alanlar kırmızıyla gösterildi.
+ur	Çizdiğiniz alanı kaydetmek için Kaydet düğmesine basın.
+ur	Bu yolun genişletilmesi için kamulaştırma kararı alındı.
+ur	Yakınlaştırmak için iki parmağınızla ekranı açın.
+ur	Seçili katman şeffaflığı yüzde elliye ayarlandı.
+ur	Adres bulunamadı, lütfen yazımı kontrol edin.
+ur	Tapu bilgileri yalnız yetkili kullanıcılara gösterilir.
+zo	Hâlâ bu işin kâr getireceğine inanıyor musun?
+zo	Evladım, hayatta sabırlı olmak lâzım.
+zo	Kâğıt, kalem ve cetvelini yanına almayı unutma.
+zo	Dükkânın önündeki rüzgârlık kırılmış.
+zo	Bu kararın sonuçları hakkında hiçbir fikrim yok.
+zo	İstasyonda bekleyen yolcular trenin gecikmesinden şikâyetçiydi.
+zo	Laboratuvardaki analizler tamamlandı.
+zo	Psikolog, çocuğun ilgisini çekmek için oyuncak kullandı.
+zo	Ağabeyim, yeğenime kocaman bir oyuncak tren almış.
+zo	Değerli müşterilerimiz, mağazamız saat dokuzda kapanacaktır.
+zo	Öğretmenimiz Türkçenin güzelliğini anlattı.
+zo	Bu meseleyi tekrar müzakere etmemiz gerekiyor.
+zo	Kahvaltıda reçel, peynir, zeytin ve simit vardı.
+zo	Müzeyyen, vazodaki menekşeleri suladı.
+zo	Ağaçların yaprakları sonbaharda sararıp dökülür.
+zo	Rehberimiz, kalenin tarihçesini ayrıntılı biçimde anlattı.
+zo	Bu teklif sizin için de mantıklı olabilir.
+zo	Şoför, yolcuları otogarın önünde indirdi.
+zo	Fizik dersinde yer çekimini öğrendik.
+zo	Üniversiteyi kazandığını duyunca çok sevindik.
+du	Bunu yapabildiğine inanamıyorum, harikasın!
+du	Çok üzgünüm, kaybınız için başınız sağ olsun.
+du	Yeter artık, sabrımı taşırdın!
+du	Sana bir sır vereceğim, ama kimseye söyleme.
+du	Kazandık! Şampiyon olduk!
+du	Maalesef bugün gelemeyeceğim, kusura bakma.
+du	Acaba kapının arkasında ne var?
+du	Bu haber beni gerçekten çok mutlu etti.
+du	Dedemin eski fotoğraflarına bakınca gözlerim doldu.
+du	Hemen çık oradan, tehlikeli!
+du	Gerçekten mi? Hiç beklemiyordum!
+du	Ne yazık ki tren kaçtı, bir sonrakini bekleyeceğiz.
+du	Bu kadar güzel bir manzarayı ilk kez görüyorum.
+du	Özür dilerim, seni kırmak istememiştim.
+du	Sakin ol, her şey yoluna girecek.

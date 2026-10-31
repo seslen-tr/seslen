@@ -1,0 +1,245 @@
+# -*- coding: utf-8 -*-
+"""
+ÖĞRETMEN KAYDI (29.10) — kendiliğinden dolan, öğretmen kalitesinde ses kaydı. Eğitim yok.
+
+Öğretmen (VoxCPM2, "1. yol") işlemcide gerçek zamanın ~5,5 katı yavaş: canlıda kullanılamaz, ama arka planda olur.
+  1. Stüdyo bir bölüm (paragraf parçası) söyleyecekken önce bütününü, sonra cümlelerini kayıtta arar (ses ×
+     cümle). Varsa öğretmenin sesi anında çalar.
+  2. Yoksa öğrenci okur ve cümle sıraya yazılır.
+  3. İşçi (python ogrenci/kayit.py isci) sıradaki cümleyi öğretmenle üretir: metin okunur hâle getirilir (rakam
+     verilince öğretmen İngilizceye kayıyor: "enkaradaki"), her aday CTC özdenetiminden geçer (ozdenetim.dinle, en çok
+     4 aday); geçen kayda girer, geçmeyen "gecmedi" diye işaretlenir (o cümleyi öğrenci okumaya devam eder).
+Asistanın cümleleri çok tekrarlandığı için konuşmanın çoğu zamanla öğretmen sesi olur. 29.10 dinleme: aynı
+konuşmada öğretmen ↔ öğrenci geçişi kulakla fark edilmiyor (cikti/teshis/karma/dinle.html).
+
+Kayıt: kullanici/ogretmen_kaydi/ (git dışında): dizin.jsonl, sira.jsonl, <ses>/<anahtar>.flac (24 kHz).
+Elif kayda girmez: öğrencisi eski sesinden eğitildi, öğretmenin 1. yol Elif'i başka ses.
+
+    python ogrenci/kayit.py isci [--bir]       sırayı işler, sıra boşken boş vakit cümlelerini (kullanici/on_kayit, kısa ve
+                                               masal cümleleri, portalın kalıp
+                                               cümleleri; SESLEN_KAYIT_GB, varsayılan 5) üretir. --bir: iş
+                                               kalmayınca durur; yoksa bekleyip sürer
+    python ogrenci/kayit.py sabit              hazır öğretmen kayıtlarını (Kaggle seslen-yeniden-uretim-8, sb###) alır
+    python ogrenci/kayit.py durum
+"""
+from __future__ import annotations
+
+import hashlib
+import json
+import os
+import sys
+import threading
+import time
+import zlib
+from pathlib import Path
+
+import numpy as np
+
+KOK = Path(__file__).resolve().parents[1]
+KAYIT = KOK / "kullanici" / "ogretmen_kaydi"
+ORAN = 24000
+ADAY = 4
+_REF = KOK / "cikti" / "kaggle" / "dene" / "ref"
+# ses → (kimlik kaydı, karakter tarifi); bulut/kiralik/yenile.py TURLAR["t9"/"t10"]["yol1"] ile aynı
+OGRETMEN_SES = {s: (_REF / f"iki_{s}.wav", s) for s in
+                ("ayse", "serdar", "zeynep", "emre", "selin", "fatma", "ece", "pitircik", "koca", "firfir",
+                 "damla", "kuzey", "kara")}
+OGRETMEN_SES |= {"hasan": (_REF / "iki_serdar.wav", "YASLI"), "can": (_REF / "can_a_p3.wav", "OGLAN8")}
+# Boş vakit: sıra boşken söylenebilecek hazır cümleler önceden üretilir. Kaynaklar: depodaki genel listeler (kısa
+# ünlemler, masal) ve kullanici/on_kayit/*.tsv (git dışında): Seslen'e bağlanan her proje kendi cümlelerini buraya
+# bırakır, bütün seslerle üretilir. Satır: duygu<TAB>cümle; {ad} sesin adıyla dolar. Kayıt SINIR_GB'a varınca boş
+# vakit üretimi durur (sıradaki gerçek cümleler sürer). Cümle başına ~69 KB (24 kHz FLAC).
+SINIR_GB = float(os.environ.get("SESLEN_KAYIT_GB", "5"))
+_AD = {"ayse": "Ayşe", "pitircik": "Pıtırcık", "firfir": "Fırfır"}
+ON_KAYIT = KOK / "kullanici" / "on_kayit"
+_GENEL = [(KOK / "veri" / "kisa_cumleler.tsv", None), (KOK / "veri" / "masal_cumleler.tsv", ("fatma", "hasan", "ayse"))]
+
+
+def anahtar(ses: str, cumle: str) -> str:
+    """Ses × cümle (ton anahtarda yok: stüdyonun seçtiği ton öğretmene yalnız tarif olarak gider; aynı cümle hazır
+    kayıtta başka tonla okunduysa da çalınır)."""
+    return hashlib.sha1(f"{ses}|{' '.join(cumle.split())}".encode()).hexdigest()[:16]
+
+
+class Kayit:
+    """Stüdyonun tarafı: bak, yoksa sıraya yaz. dizin.jsonl değişince kendiliğinden yeniden okunur."""
+
+    def __init__(self, kok: Path = KAYIT):
+        self.kok = kok
+        self._dizin: dict[str, dict] = {}
+        self._zaman = 0.0
+        self._sirada: set[str] = set()
+        self._kilit = threading.Lock()
+
+    def _tazele(self):
+        yol = self.kok / "dizin.jsonl"
+        z = yol.stat().st_mtime if yol.exists() else 0.0
+        if z != self._zaman:
+            self._dizin = {r["anahtar"]: r for r in map(json.loads, yol.read_text(encoding="utf-8").splitlines()) if r}
+            self._zaman = z
+
+    def bul(self, ses: str, cumle: str) -> np.ndarray | None:
+        import soundfile as sf
+        with self._kilit:
+            self._tazele()
+            r = self._dizin.get(anahtar(ses, cumle))
+        if not r or r.get("durum") != "tamam":
+            return None
+        x, _ = sf.read(self.kok / r["dosya"], dtype="float32")
+        return x
+
+    def sira_ekle(self, ses: str, ton: str, cumle: str) -> None:
+        if ses not in OGRETMEN_SES:
+            return
+        a = anahtar(ses, cumle)
+        with self._kilit:
+            self._tazele()
+            if a in self._dizin or a in self._sirada:
+                return
+            self._sirada.add(a)
+            self.kok.mkdir(parents=True, exist_ok=True)
+            with open(self.kok / "sira.jsonl", "a", encoding="utf-8") as f:
+                f.write(json.dumps({"anahtar": a, "ses": ses, "ton": ton, "cumle": cumle}, ensure_ascii=False) + "\n")
+
+
+def adaylar() -> list[dict]:
+    """Boş vakit cümleleri, stüdyonun böldüğü gibi (akici + turkce-duygu, telaffuz sözlüğü): stüdyo birebir bulur."""
+    from turkce_duygu import cumlelere_bol
+    from studyo import Telaffuz, akici
+    tel, liste = Telaffuz(), []
+    sesler = ["damla", "kuzey"] + [s for s in OGRETMEN_SES if s not in ("damla", "kuzey")]
+    kaynaklar = [(f, None) for f in sorted(ON_KAYIT.glob("*.tsv"))] + _GENEL     # bağlanan projeler önce
+    for ses in sesler:
+        for dosya, kimler in kaynaklar:
+            if kimler and ses not in kimler:
+                continue
+            for satir in dosya.read_text(encoding="utf-8").splitlines():
+                if not satir.strip() or satir.startswith("#") or "	" not in satir:
+                    continue
+                ton, metin = satir.split("	", 1)
+                metin = metin.replace("{ad}", _AD.get(ses, ses.capitalize()))
+                for c in cumlelere_bol(akici(metin)):
+                    c = tel.uygula(c)
+                    liste.append({"anahtar": anahtar(ses, c), "ses": ses, "ton": ton, "cumle": c, "kaynak": "bos_vakit"})
+    return liste
+
+
+def boyut_gb(kok: Path = KAYIT) -> float:
+    return sum(f.stat().st_size for f in kok.glob("*/*.flac")) / 1e9
+
+
+def _dizine_yaz(kok: Path, r: dict) -> None:
+    with open(kok / "dizin.jsonl", "a", encoding="utf-8") as f:
+        f.write(json.dumps(r, ensure_ascii=False) + "\n")
+
+
+def _oncelik_dusur() -> None:
+    """İşçi canlı konuşmayı yavaşlatmasın: Windows'ta düşük öncelik, başkasında nice."""
+    if os.name == "nt":
+        import ctypes
+        ctypes.windll.kernel32.SetPriorityClass(ctypes.windll.kernel32.GetCurrentProcess(), 0x4000)  # BELOW_NORMAL
+    else:
+        os.nice(10)
+
+
+def isci(bir: bool = False, kok: Path = KAYIT) -> None:
+    sys.path[:0] = [str(KOK / "ogrenci"), str(KOK / "ogretmen"), str(KOK / "bulut" / "kaggle")]
+    from yukle import ogretmen, sureci_hazirla
+    sureci_hazirla()
+    _oncelik_dusur()
+    import librosa
+    import soundfile as sf
+    import torch
+    import duygu
+    import kaggleIs
+    from ozdenetim import Ozdenetim, kaynak
+    from turkce_vurgu import normallestir
+    og = ogretmen("cpu")
+    sr = og.tts_model.sample_rate
+    oz = Ozdenetim()
+    kok.mkdir(parents=True, exist_ok=True)
+    bos_vakit = adaylar()
+    print(f"işçi hazır; boş vakit listesi {len(bos_vakit)} cümle", flush=True)
+    while True:
+        bitti = {json.loads(x)["anahtar"] for x in (kok / "dizin.jsonl").read_text(encoding="utf-8").splitlines()
+                 if x} if (kok / "dizin.jsonl").exists() else set()
+        sira = [json.loads(x) for x in (kok / "sira.jsonl").read_text(encoding="utf-8").splitlines() if x] \
+            if (kok / "sira.jsonl").exists() else []
+        bekleyen = list({r["anahtar"]: r for r in sira if r["anahtar"] not in bitti}.values())
+        if not bekleyen and boyut_gb(kok) < SINIR_GB:      # boş vakit: her seferinde bir cümle, sonra sıraya bakılır
+            bekleyen = next(([r] for r in bos_vakit if r["anahtar"] not in bitti), [])
+        if not bekleyen:
+            if bir:
+                return
+            time.sleep(20)
+            continue
+        for r in bekleyen:
+            ses, ton, cumle = r["ses"], r["ton"], r["cumle"]
+            ref_wav, tarif_ad = OGRETMEN_SES[ses]
+            tarif = kaggleIs.TUM_TARIF[tarif_ad] if tarif_ad in kaggleIs.TUM_TARIF else getattr(kaggleIs, tarif_ad)
+            tarif = ", ".join(x for x in (tarif, duygu.TARIF.get(ton, "")) if x)
+            hedef = kaynak(cumle)
+            t0 = time.perf_counter()
+            en_iyi = None
+            for i in range(ADAY):
+                torch.manual_seed(zlib.crc32(f"{r['anahtar']}|{i}".encode()))
+                x = np.asarray(og.generate(text=f"({tarif}){normallestir(cumle)}", reference_wav_path=str(ref_wav),
+                                           cfg_value=2.0, inference_timesteps=10), np.float32)
+                x = librosa.resample(x, orig_sr=sr, target_sr=ORAN)
+                ceza, _, d = oz.dinle(x, ORAN, hedef)
+                if en_iyi is None or ceza < en_iyi[0]:
+                    en_iyi = (ceza, x, d["duyulan"], i + 1)
+                if ceza == 0:
+                    break
+            ceza, x, duyulan, deneme = en_iyi
+            kayit = {**r, "ceza": ceza, "duyulan": duyulan, "deneme": deneme,
+                     "sn": round(time.perf_counter() - t0, 1), "zaman": time.strftime("%Y-%m-%d %H:%M")}
+            if ceza == 0:
+                (kok / ses).mkdir(exist_ok=True)
+                sf.write(kok / ses / f"{r['anahtar']}.flac", x, ORAN, subtype="PCM_16")
+                kayit |= {"durum": "tamam", "dosya": f"{ses}/{r['anahtar']}.flac"}
+            else:
+                kayit["durum"] = "gecmedi"
+            _dizine_yaz(kok, kayit)
+            print(f"{kayit['durum']}: {ses}/{ton} {cumle[:60]} ({kayit['sn']} sn, {deneme} aday)", flush=True)
+
+
+def sabit(kok: Path = KAYIT) -> None:
+    """Bir ürünün sabit cümleleri (bugün kullanici/on_kayit/cbs_portal_urun.tsv) Damla ve Kuzey için öğretmenle zaten
+    okundu ve denetimden geçti
+    (Kaggle seslen-yeniden-uretim-8, sb###): kayda alınır."""
+    import librosa
+    import soundfile as sf
+    kok.mkdir(parents=True, exist_ok=True)
+    bitti = {json.loads(x)["anahtar"] for x in (kok / "dizin.jsonl").read_text(encoding="utf-8").splitlines()
+             if x} if (kok / "dizin.jsonl").exists() else set()
+    say = 0
+    for ses in ("damla", "kuzey"):
+        d = KOK / "cikti" / "kaggle" / "indirilen" / "seslen-yeniden-uretim-8" / "veri" / ses
+        for r in map(json.loads, (d / "olcum.jsonl").read_text(encoding="utf-8").splitlines()):
+            if not r["kimlik"].startswith("sb") or not r["gecti"] or r["denetim"]:
+                continue
+            a = anahtar(ses, r["metin"])
+            if a in bitti:
+                continue
+            x, sr = sf.read(d / "wavs" / f"{r['kimlik']}.flac", dtype="float32")
+            (kok / ses).mkdir(exist_ok=True)
+            sf.write(kok / ses / f"{a}.flac", librosa.resample(x, orig_sr=sr, target_sr=ORAN), ORAN, subtype="PCM_16")
+            _dizine_yaz(kok, {"anahtar": a, "ses": ses, "ton": r["duygu"], "cumle": r["metin"], "durum": "tamam",
+                              "dosya": f"{ses}/{a}.flac", "kaynak": r["kimlik"]})
+            say += 1
+    print(f"{say} hazır öğretmen kaydı alındı")
+
+
+def durum(kok: Path = KAYIT) -> None:
+    dizin = [json.loads(x) for x in (kok / "dizin.jsonl").read_text(encoding="utf-8").splitlines() if x] \
+        if (kok / "dizin.jsonl").exists() else []
+    sira = {json.loads(x)["anahtar"] for x in (kok / "sira.jsonl").read_text(encoding="utf-8").splitlines() if x} \
+        if (kok / "sira.jsonl").exists() else set()
+    tamam = sum(r["durum"] == "tamam" for r in dizin)
+    print(f"kayıtta {tamam} cümle, geçmeyen {len(dizin) - tamam}, sırada bekleyen {len(sira - {r['anahtar'] for r in dizin})}")
+
+
+if __name__ == "__main__":
+    komut = sys.argv[1] if len(sys.argv) > 1 else "durum"
+    {"isci": lambda: isci("--bir" in sys.argv), "sabit": sabit, "durum": durum}[komut]()

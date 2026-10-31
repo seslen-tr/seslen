@@ -1,0 +1,12 @@
+.venv*/
+model/
+veri/*
+!veri/kisa_cumleler.tsv
+!veri/masal_cumleler.tsv
+!veri/sinav/
+cikti/
+__pycache__/
+*.pyc
+dinleti/ses/
+ogrenci/StyleTTS2/
+kullanici/

@@ -1,0 +1,248 @@
+# Kısa cümleler (10.10.2026): eğitim verisinin %0,3'ü 1-2 sözcük, %7'si 3-4 sözcüktü; öğrenci kısa cümlede
+# "Sınavı geçtim!" → "sınava" gibi bozuyordu. Her ses bu listeyi okur (bulut/kiralik/yenile.py plan).
+# duygu<TAB>metin
+notr	Merhaba.
+notr	Merhaba, nasılsın?
+notr	Merhaba, hoş geldiniz.
+notr	Günaydın.
+notr	İyi akşamlar.
+notr	İyi geceler.
+notr	Hoşça kal.
+notr	Görüşürüz.
+notr	Teşekkür ederim.
+notr	Çok teşekkürler.
+notr	Rica ederim.
+notr	Evet.
+notr	Hayır.
+notr	Tamam.
+notr	Peki.
+notr	Olur.
+notr	Anladım.
+notr	Bilmiyorum.
+notr	Belki.
+notr	Tabii ki.
+notr	Elbette.
+notr	Bir dakika.
+notr	Hemen geliyorum.
+notr	Biraz bekle.
+notr	Sınavı geçtim.
+notr	Sınavı kazandı.
+notr	Okula gidiyorum.
+notr	Okula geç kaldım.
+notr	Okuldan geldim.
+notr	Eve döndüm.
+notr	Yemek hazır.
+notr	Kapı açık.
+notr	Işıklar yanıyor.
+notr	Hava güzel.
+notr	Yağmur yağıyor.
+notr	Kar yağdı.
+notr	Saat beş.
+notr	Bugün pazartesi.
+notr	Yarın cumartesi.
+notr	Toplantı bitti.
+notr	Ders başladı.
+notr	Otobüs geldi.
+notr	Telefon çalıyor.
+notr	Su kaynadı.
+notr	Çay demlendi.
+notr	Kitabı okudum.
+notr	Ödevimi yaptım.
+notr	Annem aradı.
+notr	Babam geldi.
+notr	Kardeşim uyuyor.
+notr	Kedi bahçede.
+notr	Köpek havlıyor.
+notr	Yol kapalı.
+notr	Dükkan kapandı.
+notr	Fiyatlar arttı.
+notr	Sıra sende.
+notr	Benim adım Ayşe.
+notr	Ben buradayım.
+notr	Sen haklısın.
+notr	Biz hazırız.
+notr	Onlar gitti.
+notr	Her şey yolunda.
+notr	Bir varmış, bir yokmuş.
+notr	Evvel zaman içinde.
+notr	Masal burada bitti.
+notr	Gökten üç elma düşmüş.
+notr	Uzun zaman önce.
+notr	Küçük bir köyde.
+notr	Ertesi sabah.
+notr	Derken bir gün.
+notr	Ve sonra uyudu.
+notr	Kapıyı kapat.
+notr	Pencereyi aç.
+notr	Buraya gel.
+notr	Şuraya otur.
+notr	Sağa dön.
+notr	Düz devam edin.
+notr	Lütfen bekleyin.
+notr	Biletinizi gösterin.
+notr	Adınızı yazın.
+notr	Formu doldurun.
+neseli	Harika!
+neseli	Harika bir haber!
+neseli	Çok güzel!
+neseli	Ne güzel!
+neseli	Bravo!
+neseli	Aferin sana!
+neseli	Sınavı geçtim!
+neseli	Okula kabul edildim!
+neseli	Başardık!
+neseli	Kazandık!
+neseli	Çok mutluyum!
+neseli	Ne hoş bir sürpriz!
+neseli	Seni gördüğüme sevindim!
+neseli	Doğum günün kutlu olsun!
+neseli	İyi ki varsın!
+neseli	Bayramın kutlu olsun!
+neseli	Afiyet olsun!
+neseli	Geçmiş olsun!
+neseli	Hoş geldin!
+neseli	Tebrikler!
+neseli	Çok yaşa!
+neseli	Ne şanslıyız!
+neseli	Bugün harika geçti!
+neseli	Yemek nefis olmuş!
+neseli	Bu çok komik!
+neseli	Çok sevindim!
+neseli	Bayıldım!
+neseli	Hadi bakalım!
+neseli	Oley!
+neseli	Yaşasın, tatil başladı!
+heyecan	İnanamıyorum!
+heyecan	Gol!
+heyecan	Geliyorlar!
+heyecan	Çabuk, koş!
+heyecan	Bak, bak!
+heyecan	İşte orada!
+heyecan	Buldum!
+heyecan	Kazandım!
+heyecan	Sınavı geçtim!
+heyecan	Okul tatil oldu!
+heyecan	Yarış başladı!
+heyecan	Haydi, başlıyoruz!
+heyecan	Sonunda geldi!
+heyecan	Bu inanılmaz!
+heyecan	Çok heyecanlıyım!
+heyecan	Hadi, acele et!
+heyecan	Kapı açıldı!
+heyecan	Bilet aldık!
+heyecan	Uçak kalkıyor!
+heyecan	Tamam, hazırım!
+heyecan	Sıra bizde!
+heyecan	Gökkuşağı çıktı!
+heyecan	Kar yağıyor!
+heyecan	Denize gidiyoruz!
+heyecan	Kuzey yıldızı orada!
+merak	Nasılsın?
+merak	Ne oldu?
+merak	Neden?
+merak	Nereye?
+merak	Kim geldi?
+merak	Ne zaman?
+merak	Kaç tane?
+merak	Hangisi?
+merak	Gerçekten mi?
+merak	Emin misin?
+merak	Sınavı geçtin mi?
+merak	Okula gittin mi?
+merak	Okula gidecek misin?
+merak	Geliyor musun?
+merak	Hazır mısın?
+merak	Yardım lazım mı?
+merak	Saat kaç?
+merak	Bu ne?
+merak	Orada kim var?
+merak	Ne düşünüyorsun?
+merak	Yemek yedin mi?
+merak	Beni duyuyor musun?
+merak	Adın ne?
+merak	Nerelisin?
+merak	Kaç yaşındasın?
+merak	Bunu kim yaptı?
+merak	Neden geç kaldın?
+merak	Ne zaman döneceksin?
+merak	Hangi yoldan gidelim?
+merak	Su ister misin?
+merak	Akşam geliyor musun?
+merak	Masalı biliyor musun?
+merak	Sonra ne olmuş?
+merak	Kapıyı kim çaldı?
+merak	Burası neresi?
+uyari	Dikkat!
+uyari	Dur!
+uyari	Sakın!
+uyari	Yavaş ol!
+uyari	Dikkat et!
+uyari	Elini çek!
+uyari	Oraya gitme!
+uyari	Dokunma!
+uyari	Acele etme!
+uyari	Korkma!
+uyari	Yapma!
+uyari	Sıcak, dikkat!
+uyari	Yol kaygan!
+uyari	Kapı kapanıyor!
+uyari	Kemerini tak!
+uyari	Sırayı bozmayın!
+uyari	Burada durmayın!
+uyari	Telefonları kapatın!
+uyari	Sigara içmeyin!
+uyari	Lütfen sessiz olun!
+uyari	Çocukları yalnız bırakmayın!
+uyari	Kaçırma, son gün!
+uyari	Unutma!
+uyari	Geç kalma!
+uyari	Yere atma!
+ozur	Özür dilerim.
+ozur	Kusura bakma.
+ozur	Affedersiniz.
+ozur	Pardon.
+ozur	Çok üzgünüm.
+ozur	Geç kaldım, özür dilerim.
+ozur	Yanlışlık oldu.
+ozur	Unuttum, kusura bakma.
+ozur	Bilerek yapmadım.
+ozur	Haklısın, hata bendeydi.
+ozur	Bir daha olmayacak.
+ozur	Beklettim, affedersin.
+ozur	Sınavı geçemedim, üzgünüm.
+ozur	Okula gelemedim.
+ozur	Rahatsız ettim, pardon.
+uzgun	Çok yazık.
+uzgun	Gitti.
+uzgun	Bitti artık.
+uzgun	Kaybettik.
+uzgun	Çok yorgunum.
+uzgun	Canım sıkılıyor.
+uzgun	Özledim.
+uzgun	Kimse gelmedi.
+uzgun	Sınavı geçemedim.
+uzgun	Okul bitti.
+uzgun	Yağmur dinmedi.
+uzgun	Her şey değişti.
+kizgin	Yeter artık!
+kizgin	Hayır, dedim!
+kizgin	Bu ne biçim iş?
+kizgin	Kim yaptı bunu?
+kizgin	Hemen çık dışarı!
+kizgin	Sus!
+kizgin	Bıktım!
+kizgin	Yine mi geç kaldın?
+kizgin	Bunu kabul etmiyorum!
+kizgin	Çok ayıp!
+kizgin	Bana bağırma!
+kizgin	Benim ormanımda ne arıyorsun?
+fisilti	Sessiz ol.
+fisilti	Bebek uyuyor.
+fisilti	Bir sır vereyim mi?
+fisilti	Kimseye söyleme.
+fisilti	Arkanda biri var.
+fisilti	Yavaşça gel.
+fisilti	Şşş, dinle.
+fisilti	Işığı kapat.
+fisilti	Herkes uyudu.
+fisilti	Yarın anlatırım.

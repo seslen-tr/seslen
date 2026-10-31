@@ -1,0 +1,9 @@
+voxcpm==2.0.3
+faster-whisper==1.2.1
+soundfile
+librosa
+soxr
+huggingface_hub
+kaggle==2.2.4
+nvidia-cublas-cu12
+nvidia-cudnn-cu12==9.*
