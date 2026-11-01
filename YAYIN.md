@@ -67,7 +67,10 @@ bağlanır, kendi cümle listelerini `kullanici/on_kayit/` altına bırakır.
 Açılmayanlar (açık depoda yok):
 - **Ürün sesleri Damla ve Kuzey:** tarifleri `kullanici/ozel_sesler.json`'da, kayıtları, stil vektörleri ve
   ağırlıklar `cikti/`'de (ikisi de git dışında). Dosya yoksa Seslen 14 sesle çalışır.
-- **Gerçek kişi verisi:** YODAS / ses uzayı eşlemeleri 31.10–01.11'de silindi.
+- **Gerçek kişi verisi:** ses uzayı eşlemeleri (YouTube kimlikleri, gerçek konuşmacıya benzetme) 31.10–01.11'de
+  koddan çıktı; havuzu (`veri/havuz`) kullanılmıyor, silinecek. YODAS2 ham kesitleri (`veri/egitim/wavs/yodas`, git
+  dışında) t8–t10'un telaffuz yardımcı verisi olduğu için duruyor (CC BY 3.0; LISANSLAR.md). seslen-tts t10'dan
+  türediği için model kartı bu atfı taşımalı (02.11: README'lere eklendi; Hugging Face kartı yüklenince güncellenir).
 - **Ölçü sayfaları** (`dinleti/`): ürün seslerinin tarifleri geçiyor, sesleri de depoda yok.
 - **Geçmiş:** açık depo tek commit'le başlar; bütün geçmiş GitLab'daki özel depoda kalır.
 

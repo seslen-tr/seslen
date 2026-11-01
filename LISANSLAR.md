@@ -6,6 +6,7 @@ Satılacak bir ürüne gidecek her parça ticari kullanıma açık olmalı.
 |---|---|---|---|
 | VoxCPM2 (openbmb) — öğretmen | Apache-2.0 | evet | Kullanım koşulu: taklit, dolandırıcılık, dezenformasyon yasak; yapay zekâ sesi olduğu belirtilmeli |
 | ISSAI Turkish Speech Corpus | CC BY 4.0 (makale/README); HF etiketi MIT | evet | Kaynak gösterilmeli. 16 kHz: yalnız telaffuz/temel model için, son ses kalitesi için değil. Kayıttaki gerçek kişilerin sesi TAKLİT EDİLMEZ |
+| YODAS2 Türkçe (espnet/yodas2; Creative Commons lisanslı YouTube videoları) | CC BY 3.0 | evet | t8–t10 öğrencisinde telaffuz için yardımcı veri: t8–t9 ön eğitimi ~22 sa, t10 listesinde 1.000 kesit. Seslerin hiçbiri bu konuşmacılardan değildir (16 ses öğretmenin tarif tasarımı); kayıttaki gerçek kişilerin sesi TAKLİT EDİLMEZ. Atıf: Li vd. 2023, "YODAS: YouTube-Oriented Dataset for Audio and Speech" |
 | Common Voice Türkçe cümle havuzu (sentence-collector, wiki.tr) — derlem metni | CC0 | evet | Yalnız METİN; Common Voice ses kayıtları kullanılmıyor |
 | faster-whisper / Whisper medium | MIT | evet | Yalnız ölçüm ve doğrulama |
 | StyleTTS2 (yl4579) — öğrenci kodu ve başlangıç ağırlığı (StyleTTS2-LJSpeech) | MIT | evet | LJSpeech ağırlığı yalnız başlangıç; ses tamamen öğretmen verisiyle yeniden öğrenildi |
