@@ -21,6 +21,7 @@ Elif kayda girmez: öğrencisi eski sesinden eğitildi, öğretmenin 1. yol Elif
                                                kalmayınca durur; yoksa bekleyip sürer
     python ogrenci/kayit.py sabit              hazır öğretmen kayıtlarını (Kaggle seslen-yeniden-uretim-8, sb###) alır
     python ogrenci/kayit.py durum
+    python ogrenci/kayit.py dinle              kullanici/ogretmen_kaydi/dinle.html (kayıttaki sesleri dinleme sayfası)
 """
 from __future__ import annotations
 
@@ -240,6 +241,35 @@ def durum(kok: Path = KAYIT) -> None:
     print(f"kayıtta {tamam} cümle, geçmeyen {len(dizin) - tamam}, sırada bekleyen {len(sira - {r['anahtar'] for r in dizin})}")
 
 
+def dinle(kok: Path = KAYIT) -> Path:
+    """Kayıttaki sesleri dinlemek için kok/dinle.html (ses başına, en yeni üstte; geçmeyenler ayrı listede)."""
+    import html
+    dizin = [json.loads(x) for x in (kok / "dizin.jsonl").read_text(encoding="utf-8").splitlines() if x] \
+        if (kok / "dizin.jsonl").exists() else []
+    sesler: dict[str, list] = {}
+    for r in reversed(dizin):
+        sesler.setdefault(r["ses"], []).append(r)
+    govde = []
+    for ses, kayitlar in sesler.items():
+        tamam = [r for r in kayitlar if r["durum"] == "tamam"]
+        govde.append(f"<details open><summary>{ses} — {len(tamam)} kayıt, {len(kayitlar) - len(tamam)} geçmeyen"
+                     "</summary><table>")
+        for r in tamam:
+            govde.append(f"<tr><td>{r['ton']}</td><td>{html.escape(r['cumle'])}</td><td><audio controls preload=none "
+                         f"src=\"{r['dosya']}\"></audio></td></tr>")
+        govde.append("</table>")
+        gecmeyen = [html.escape(r["cumle"]) for r in kayitlar if r["durum"] != "tamam"]
+        if gecmeyen:
+            govde.append("<p class=g>Geçmeyen (öğrenci okur): " + " · ".join(gecmeyen) + "</p>")
+        govde.append("</details>")
+    yol = kok / "dinle.html"
+    yol.write_text("<!doctype html><meta charset=utf-8><title>Öğretmen kaydı</title><style>body{font:15px sans-serif;"
+                   "margin:16px}td{padding:2px 8px;border-bottom:1px solid #ddd}summary{font-size:18px;margin:12px 0}"
+                   ".g{color:#a33}</style><h1>Öğretmen kaydı</h1>" + "".join(govde), encoding="utf-8")
+    print(yol)
+    return yol
+
+
 if __name__ == "__main__":
     komut = sys.argv[1] if len(sys.argv) > 1 else "durum"
-    {"isci": lambda: isci("--bir" in sys.argv), "sabit": sabit, "durum": durum}[komut]()
+    {"isci": lambda: isci("--bir" in sys.argv), "sabit": sabit, "durum": durum, "dinle": dinle}[komut]()

@@ -54,7 +54,8 @@ Türkçe PL-BERT ([turkce-plbert](../../ses_projeleri/turkce-plbert)), duygu se�
   öğrenci geçişi kulakla fark edilmiyor. Sıra boşken işçi önceden doldurur: Seslen'e bağlanan her proje kendi
   cümlelerini `kullanici/on_kayit/<proje>.tsv` (git dışında; satır `duygu<TAB>cümle`, `{ad}` sesin adı) olarak
   bırakır, bütün seslerle üretilir; depodaki genel listeler (kısa ünlemler, masal) da girer. Kayıt
-  `SESLEN_KAYIT_GB`'a (5) varınca önceden doldurma durur. Kayıt `kullanici/ogretmen_kaydi/` (git dışında). Hız ya
+  `SESLEN_KAYIT_GB`'a (5) varınca önceden doldurma durur. Kayıt `kullanici/ogretmen_kaydi/` (git dışında; dinlemek için
+  `python ogrenci/kayit.py dinle` → `dinle.html`). Hız ya
   da perde elle değiştirilince kayıt kullanılmaz.
 - **İndir:** WAV ya da MP3.
 - **API:** `POST /v1/audio/speech` (OpenAI ses ucu biçimi, WAV/MP3), `GET /v1/voices`, `POST /api/okunus`,
