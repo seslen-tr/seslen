@@ -71,6 +71,16 @@ Açılmayanlar (açık depoda yok):
 - **Ölçü sayfaları** (`dinleti/`): ürün seslerinin tarifleri geçiyor, sesleri de depoda yok.
 - **Geçmiş:** açık depo tek commit'le başlar; bütün geçmiş GitLab'daki özel depoda kalır.
 
+01.11.2026'da açıldı: **github.com/seslen-tr/seslen** (herkese açık, MIT). Yerelde `acik` dalı açık deponun
+`main`'idir; özel geçmiş hiçbir zaman oraya gönderilmez (`git push ... main` değil). Güncellerken `main`'in ağacından
+`dinleti/` çıkarılıp `acik`'in üstüne tek commit yapılır:
+
+```
+set GIT_INDEX_FILE=.git\acik-index && git read-tree main && git rm -r -q --cached dinleti
+git commit-tree <git write-tree çıktısı> -p acik -m "..."  →  git update-ref refs/heads/acik <commit>
+git push https://github.com/seslen-tr/seslen.git acik:main
+```
+
 Açık ses modeli hazır: `Masaüstü/ses_projeleri/seslen-tts`.
 - Çıkarım PyTorch'suz, yalnız ONNX Runtime ile. `ogrenci/acikAktar.py` metin tarafını ONNX'e aktardı; Seslen'in
   yoluyla eşdeğerlik birebir, ONNX farkı ≤1,3·10⁻⁵.
@@ -81,11 +91,13 @@ Açık ses modeli hazır: `Masaüstü/ses_projeleri/seslen-tts`.
   `cikti/acik/seslen-tts-t6/` (0.1.0) ve `seslen-tts-t3/`. Paket yoluyla 6 ses × 14 cümle: UTMOS t6'ya göre
   Ayşe 3,73→3,89, Emre 2,42→2,87, Fatma 1,87→2,38, Hasan 2,48→3,26, Koca 3,81→3,89, Zeynep 3,36→3,25; CTC denetiminde
   tek gerçek hata (Hasan "aradığın"). Hugging Face'e gizli yüklendi (etiketler v0.1.0, v0.2.0); GitLab ve GitHub'da
-  v0.2.0; 0.2.1 (kısa cümle taşıyıcısı) GitLab ve GitHub'da, model aynı. PyPI'da henüz yok.
+  v0.2.0; 0.2.1 (kısa cümle taşıyıcısı) GitLab ve GitHub'da, model aynı. 01.11: PyPI'da 0.2.1 (turkce-normalize
+  0.1.3 ile); temiz ortamda `pip install seslen-tts` PyTorch'suz 139 MB, Zeynep 7,1 sn sesi 2,9 sn'de üretti.
 - Temiz ortamda kurulum sınandı: PyTorch yok, ortam 155 MB, komut satırı aracı çalışıyor, Whisper birebir doğru.
 - Ses klonlama yok (bilerek).
 
 Yayın sırası (girişlerden sonra):
-1. GitHub: 7 depo `seslen-tr` altında (gönderildi; herkese açık değilse depo ayarından açın).
-2. PyPI: turkce-normalize → turkce-vurgu → turkce-tts-sinav → turkce-duygu → turkce-uslup → seslen-tts.
+1. GitHub: 7 depo `seslen-tr` altında (gönderildi; herkese açık değilse depo ayarından açın) + Seslen (01.11, açık).
+2. PyPI: turkce-normalize → turkce-vurgu → turkce-tts-sinav → turkce-duygu → turkce-uslup → seslen-tts
+   (01.11: hepsi PyPI'da; normalize 0.1.3, seslen-tts 0.2.1 en son yüklenenler).
 3. Hugging Face: turkce-duygu, turkce-uslup, turkce-plbert, seslen-tts (önce gizli, kontrol, sonra açık).
