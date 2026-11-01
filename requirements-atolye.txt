@@ -1,0 +1,10 @@
+# Atölye: öğretmen (VoxCPM2), öğretmen kaydı işçisi, veri üretimi, Whisper denetimi, eğitim. Stüdyo için yalnız
+# requirements.txt yeter.
+-r requirements.txt
+voxcpm==2.0.3
+faster-whisper==1.2.1
+kaggle==2.2.4
+pyloudnorm
+accelerate
+nvidia-cublas-cu12
+nvidia-cudnn-cu12==9.*

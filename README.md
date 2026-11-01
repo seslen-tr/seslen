@@ -3,20 +3,14 @@
 Türkçe, duygulu, çok sesli seslendirme. 16 ses × 9 duygu. GPU ve internet gerekmez: her şey bu bilgisayarın
 işlemcisinde çalışır, metin ve ses dışarı çıkmaz.
 
-Kardeş projeler (`Masaüstü/ses_projeleri/`) burada birleşir: metin hazırlama
-([turkce-normalize](../../ses_projeleri/turkce-normalize)), vurgu ([turkce-vurgu](../../ses_projeleri/turkce-vurgu)),
-Türkçe PL-BERT ([turkce-plbert](../../ses_projeleri/turkce-plbert)), duygu seçimi
-([turkce-duygu](../../ses_projeleri/turkce-duygu)), üslup ([turkce-uslup](../../ses_projeleri/turkce-uslup)); ölçüm için
-[turkce-tts-sinav](../../ses_projeleri/turkce-tts-sinav). Bu modelin açık, PyTorch'suz sürümü
-[seslen-tts](../../ses_projeleri/seslen-tts)'tir (6 açık ses; `ogrenci/acikAktar.py` hazırlar, bkz. [YAYIN.md](YAYIN.md)).
-
-> **07.10.2026:** Seslen artık Ses Atölyesi'nin kendisidir. Eski Seslen (Piper öğrencisi + WORLD çizgi dönüşümü,
-> CBS Portal'ın çağırdığı servis, port 8770) git geçmişinde f952f66'dan önce durur; büyük dosyaları o gün
-> `Masaüstü/arsiv/seslen-eski` klasörüne alınmıştı (11.10'da Masaüstü'nde bu klasör yok). CBS Portal'ın `/api/seslen`
-> vekili (yalnız damla/kuzey) ve gis-server hâlâ eski servisin adresine bakar (`SESLEN_BASE_URL`, varsayılan
-> `http://127.0.0.1:8770`); bu depo o servisi sunmaz. Karakter tasarımı (ses karıştırma, karakter kaydetme)
-> `Masaüstü/cbs-karakter-studyo` projesine taşındı: o proje bu deponun modelini koduna dokunmadan kullanır
-> (`ses/sunucu.py`, `SESLEN_KOK`, http://127.0.0.1:8790, eski Seslen çağrılarıyla uyumlu `/v1/audio/speech`).
+Kardeş projeler burada birleşir (hepsi [github.com/seslen-tr](https://github.com/seslen-tr) altında, PyPI'da):
+metin hazırlama ([turkce-normalize](https://github.com/seslen-tr/turkce-normalize)), vurgu
+([turkce-vurgu](https://github.com/seslen-tr/turkce-vurgu)), Türkçe PL-BERT
+([turkce-plbert](https://github.com/seslen-tr/turkce-plbert)), duygu seçimi
+([turkce-duygu](https://github.com/seslen-tr/turkce-duygu)), üslup ([turkce-uslup](https://github.com/seslen-tr/turkce-uslup));
+ölçüm için [turkce-tts-sinav](https://github.com/seslen-tr/turkce-tts-sinav). Bu modelin açık, PyTorch'suz sürümü
+[seslen-tts](https://github.com/seslen-tr/seslen-tts)'tir (6 açık ses; `ogrenci/acikAktar.py` hazırlar, bkz.
+[YAYIN.md](YAYIN.md)). Başka projeden nasıl kullanılacağı: [Başka projelerde](#başka-projelerde).
 
 ## Kullanım
 
@@ -73,6 +67,33 @@ st = Studyo()                            # ürün ağırlığı: cikti/ogrenci/t
 for p in st.seslendir("[neşeli] Günaydın! [duraklama 1] [üzgün] Ama hava yağmurlu.", Ayar(ses="zeynep")):
     oynat(p.ses)                         # 24 kHz; ardından p.sessizlik_ms bekle
 ```
+
+## Başka projelerde
+
+Seslen'in parçaları ayrı ayrı kullanılabilir; hangisi yetiyorsa o alınır:
+
+| İhtiyaç | Kullanılacak | Kurulum |
+|---|---|---|
+| Türkçe metni okunuşa hazırlamak (sayı, tarih, para, kısaltma, yabancı ad) | turkce-normalize | `pip install turkce-normalize` |
+| Vurgulu okunuş (G2P), hece, vurgu | turkce-vurgu | `pip install turkce-vurgu` |
+| Cümlenin duygusu ve yoğunluğu | turkce-duygu | `pip install turkce-duygu` |
+| Metnin üslubu (haber, masal, talimat…) ve okuma hızı | turkce-uslup | `pip install turkce-uslup` |
+| Kendi Türkçe ön ucunu ölçmek | turkce-tts-sinav | `pip install turkce-tts-sinav` |
+| Seslendirme, PyTorch'suz, hafif (6 açık ses) | seslen-tts | `pip install seslen-tts` |
+| Bütün ayarlarıyla stüdyo, 16 ses, özdenetim | bu depo | aşağıdaki Kurulum; HTTP ya da Python |
+
+- **HTTP:** `python ogrenci/studyoSunucu.py`, sonra `POST http://127.0.0.1:8780/v1/audio/speech` (OpenAI ses ucu
+  biçimi: `{"input": "...", "voice": "zeynep"}`). OpenAI istemcisi kullanan bir proje yalnız adresi değiştirir.
+- **Python:** yukarıdaki `Studyo` / `Ayar` örneği; `ogrenci/` yola eklenir.
+- **Projeye özgü veri** depoya girmeden `kullanici/` altına konur: okunuş düzeltmeleri `telaffuz.json`, özel sesler
+  `ozel_sesler.json` (kadro ve tarif; bkz. `ogretmen/kadro.py`), projenin sık cümleleri `on_kayit/<proje>.tsv`
+  (öğretmen kaydı varsa önceden üretilir).
+- **Uyumluluk:** Seslen kardeş projelerin yalnız PyPI'daki herkese açık işlevlerini kullanır
+  (`turkce_vurgu.normallestir`, `heceler`, `ozel_kokler`, `vurgulu_hece`, `g2p`; `turkce_duygu.Cozumleyici`,
+  `cumlelere_bol`;
+  `turkce_uslup.uslup`, `okuma_ayari`). Kardeş projeler Seslen'e bağlı değildir. Metin yolu her gönderimde
+  turkce-tts-sinav ile sınanır (`araclar/olcu/onuc.py`); bir kütüphane yeni sürümde Seslen'i bozarsa GitHub'daki
+  test düşer.
 
 ## Bir cümlenin yolu
 
@@ -201,7 +222,10 @@ ogrenci/         StyleTTS2 öğrenci: model.py, hizli.py + onnxAktar.py, studyo.
                  g2p.py (turkce-vurgu'ya yönlendirir)
 ogrenci/StyleTTS2/  yl4579/StyleTTS2 kopyası + Utils/ ağırlıkları + Models/LJSpeech/config.yml (gitignore)
 araclar/olcu/    ortak ölçü: olcu.py (Whisper, netlik), dogallik.py (UTMOS), kelimeGuven.py, denetim.py (dil modelsiz
-                 CTC ile sözcük telaffuz puanı ve fazladan ses), sinav.py (her modelde 16 ses × 273 cümle: veri/sinav/)
+                 CTC ile sözcük telaffuz puanı ve fazladan ses), sinav.py (her modelde 16 ses × 273 cümle: veri/sinav/),
+                 onuc.py (metin yolu: turkce-tts-sinav ile metin hazırlama, vurgu, okunuş; GitHub testi)
+.github/         test.yml: derleme + onuc.py, kardeş projelerin PyPI sürümleriyle
+requirements.txt  stüdyo · requirements-atolye.txt  öğretmen, kayıt işçisi, eğitim
 araclar/deney/   karşılaştırma ve teşhis: tonOlc.py, zayifTeshis.py, soruOlc.py, zincir.py, yolKarsilastir.py
                  (modellerin ve 1. yolun dinleme sayfası)
 bulut/modal/     Modal (aylık 30 $ ücretsiz kredi, yalnız HTTPS): egitModal.py (yükle, hız denemesi, ayrık eğitim, izle, indir)
@@ -214,7 +238,7 @@ bulut/kaggle/    Kaggle'da ücretsiz GPU: kaggleIs.py; uret.py (öğretmen veris
                  adayları), yeniden.py (plana göre yeniden okuma; D kipi = 1. yol, denetimle en iyi okuma),
                  ogretmenDene.py (öğretmen denemeleri)
 dinleti/         ölçü betiklerinin dinleme sayfaları (ses/ gitignore)
-kullanici/       telaffuz sözlüğü (gitignore)
+kullanici/       telaffuz sözlüğü, öğrenilen onarımlar, özel sesler, öğretmen kaydı (gitignore)
 veri/ model/ cikti/   veri, indirilen modeller, ağırlıklar ve üretilen sesler (gitignore; kisa_cumleler.tsv ve
                       masal_cumleler.tsv depoda)
 ```
@@ -226,15 +250,19 @@ kaldırıldı. Hepsi git geçmişinde duruyor.
 ## Kurulum
 
 ```
+git clone https://github.com/seslen-tr/seslen && cd seslen
 python -m venv .venv
-.venv\Scripts\python -m pip install -r requirements.txt
-.venv\Scripts\python -m pip install fastapi uvicorn onnxruntime torch torchaudio transformers
-:: kardeş projeler: Masaüstü\ses_projeleri\ (GitLab: gitlab.com/mveyseldelibas/turkce-*)
-.venv\Scripts\python -m pip install --no-deps -e ..\..\ses_projeleri\turkce-normalize -e ..\..\ses_projeleri\turkce-vurgu ^
-    -e ..\..\ses_projeleri\turkce-duygu -e ..\..\ses_projeleri\turkce-uslup
+.venv\Scripts\python -m pip install -r requirements.txt           :: stüdyo (kardeş projeler PyPI'dan gelir)
+.venv\Scripts\python -m pip install -r requirements-atolye.txt    :: isteğe bağlı: öğretmen, kayıt işçisi, eğitim
 git clone --depth 1 https://github.com/yl4579/StyleTTS2 ogrenci\StyleTTS2
 .venv\Scripts\python -c "from huggingface_hub import hf_hub_download as h; h('yl4579/StyleTTS2-LJSpeech', 'Models/LJSpeech/config.yml', local_dir='ogrenci/StyleTTS2')"
+.venv\Scripts\python araclar\olcu\onuc.py                         :: metin yolu sınavı (modelsiz)
 ```
+
+Kardeş projelerden birini aynı anda geliştirirken PyPI sürümü yerine yerel klasörü kurun:
+`.venv\Scripts\python -m pip install --no-deps -e ..\turkce-vurgu` (GitHub'daki test aynı sınavı PyPI'daki son
+sürümlerle çalıştırır: `.github/workflows/test.yml`). Öğrencinin ağırlık dosyaları (`cikti/ogrenci/t10-*`)
+henüz yayımlanmadı; yayımlanana kadar stüdyo yalnız onları olan bilgisayarda konuşur.
 
 Çalışma anında `model.Ogrenci` yapıyı `ogrenci/StyleTTS2/Models/LJSpeech/config.yml`'den, ASR/JDC/PL-BERT
 iskeletini `Utils/`'ten kurar (bu dosyalar klonla gelir); eğitilmiş ağırlıklar üstüne bizim `.pth` dosyasından

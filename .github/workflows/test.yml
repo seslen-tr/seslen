@@ -1,0 +1,15 @@
+name: test
+on: [push, pull_request]
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      # bütün betikler derleniyor mu (modelsiz)
+      - run: python -m compileall -q ogrenci ogretmen araclar bulut
+      # metin yolu, kardeş projelerin PyPI'daki son sürümleriyle (turkce-tts-sinav sınavı)
+      - run: pip install turkce-normalize turkce-vurgu turkce-tts-sinav
+      - run: python araclar/olcu/onuc.py --esik
