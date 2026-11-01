@@ -49,14 +49,17 @@ Türkçe PL-BERT ([turkce-plbert](../../ses_projeleri/turkce-plbert)), duygu se�
   `cikti/ozdenetim/duzelmeyen.jsonl`'a yazılır (sonraki eğitimin verisi). `SESLEN_OZDENETIM=0` ile kapalı.
 - **Öğretmen kaydı** (`ogrenci/kayit.py`): kendiliğinden dolan, öğretmen kalitesinde kayıt. Stüdyo bir cümleyi
   (ya da ardışık cümle grubunu) önce kayıtta arar, varsa öğretmenin (VoxCPM2, 1. yol) sesini anında çalar; yoksa
-  öğrenci okur ve cümle sıraya yazılır. İşçi (`python ogrenci/kayit.py isci`) sırayı işlemcide arka planda öğretmenle
-  üretir; metin okunur hâle getirilir, her aday özdenetimden geçer, geçen kayda girer. Aynı konuşmada öğretmen ↔
-  öğrenci geçişi kulakla fark edilmiyor. Sıra boşken işçi önceden doldurur: Seslen'e bağlanan her proje kendi
-  cümlelerini `kullanici/on_kayit/<proje>.tsv` (git dışında; satır `duygu<TAB>cümle`, `{ad}` sesin adı) olarak
-  bırakır, bütün seslerle üretilir; depodaki genel listeler (kısa ünlemler, masal) da girer. Kayıt
+  öğrenci okur ve cümle sıraya yazılır (iki kez istenen öne geçer). İşçi (`python ogrenci/kayit.py isci`) sırayı
+  işlemcide arka planda öğretmenle üretir; metin okunur hâle getirilir, her aday özdenetimden geçer (4 aday, kısa
+  cümlede 8). Kusursuz aday ya da aynı cümlenin öğrenci okuyuşundan (çalışan stüdyoya sorulur) kötü olmayan aday
+  kayda girer; geçmeyeni öğrenci okumaya devam eder. Aynı konuşmada öğretmen ↔ öğrenci geçişi kulakla fark
+  edilmiyor. Sıra boşken işçi önceden doldurur: Seslen'e bağlanan her proje kendi cümlelerini
+  `kullanici/on_kayit/<proje>.tsv` (git dışında; satır `duygu<TAB>cümle`, `{ad}` sesin adı; `# sesler: damla, kuzey`
+  satırı sesleri sınırlar, yoksa bütün sesler) olarak bırakır. Genel liste önceden üretilmez. Kayıt
   `SESLEN_KAYIT_GB`'a (5) varınca önceden doldurma durur. Kayıt `kullanici/ogretmen_kaydi/` (git dışında; dinlemek için
-  `python ogrenci/kayit.py dinle` → `dinle.html`). Hız ya
-  da perde elle değiştirilince kayıt kullanılmaz.
+  `python ogrenci/kayit.py dinle` → `dinle.html`). Okuma ayarları (hız, perde, duygu şiddeti, üslup, tonlama,
+  virgül) elle değiştirilince kayıt kullanılmaz; ton elle seçildiyse (ayar ya da `[işaret]`) yalnız o tonun kaydı
+  çalar, yoksa öğrenci okur ve cümle o tonla sıraya girer.
 - **İndir:** WAV ya da MP3.
 - **API:** `POST /v1/audio/speech` (OpenAI ses ucu biçimi, WAV/MP3), `GET /v1/voices`, `POST /api/okunus`,
   `POST /api/uslup` (yazarken otomatik üslup önizlemesi), telaffuz uçları; ayrıntı ve örnekler sitenin "API"

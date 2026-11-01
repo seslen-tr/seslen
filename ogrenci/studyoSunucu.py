@@ -85,6 +85,7 @@ class AyarGirdi(BaseModel):
     tonlama: float | None = Field(None, ge=0, le=2)
     duraklama_ms: int | None = Field(None, ge=0, le=2000)
     virgul_ms: int | None = Field(None, ge=0, le=800)
+    kayit: bool = True                  # öğretmen kaydından çal; False: hep öğrenci (kayit.py karşılaştırması)
 
 
 class Istek(BaseModel):

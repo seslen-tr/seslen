@@ -314,15 +314,19 @@ class Studyo:
         for b_i, b in enumerate(bolumler):
             istenen = b.ton if b.ton is not None else ayar.ton
             sonuclar = self._duygu[ayar.ses].metin_cozumle(akici(b.metin))
-            # öğretmen kaydı (kayit.py): hız / perde elle değiştirilmediyse. Önce ardışık cümle grupları aranır
-            # (hazır kayıtlar "Merhaba, ben Damla. Seni dinliyorum…" gibi birkaç cümle bir arada)
-            kayitta = ayar.kayit and ayar.perde == 1.0 and ayar.hiz is None and b.hiz is None
+            # öğretmen kaydı (kayit.py): okuma ayarları elle değiştirilmediyse (öğretmenin kaydı onları izlemez:
+            # hız, perde, şiddet, üslup, tonlama, virgül). Ton elle seçildiyse (ayar ya da işaret) yalnız o tonun
+            # kaydı çalar. Önce ardışık cümle grupları aranır (hazır kayıtlar birkaç cümle bir arada)
+            kayitta = (ayar.kayit and ayar.perde == 1.0 and ayar.hiz is None and b.hiz is None
+                       and ayar.yogunluk is None and ayar.uslup == "otomatik" and ayar.tonlama is None
+                       and ayar.virgul_ms is None)
+            kayit_ton = None if istenen == "otomatik" else istenen
             cumleler = [self.telaffuz.uygula(r.cumle) for r in sonuclar]
             grup: dict[int, tuple[int, np.ndarray]] = {}
             i = 0
             while kayitta and i < len(cumleler):
                 for k in range(len(cumleler), i, -1):          # en uzun grup önce, sonra tek cümle
-                    w = self.kayit.bul(ayar.ses, " ".join(cumleler[i:k]))
+                    w = self.kayit.bul(ayar.ses, " ".join(cumleler[i:k]), kayit_ton)
                     if w is not None:
                         grup[i] = (k, w)
                         i = k
@@ -374,7 +378,7 @@ class Studyo:
                     else:
                         w = model.konus(cumle, s, **ayarlar)
                     if kayitta:
-                        self.kayit.sira_ekle(ayar.ses, ton, cumle)
+                        self.kayit.sira_ekle(ayar.ses, ton, cumle, sabit=kayit_ton is not None)
                 bilgi = {"uslup": uslup_ad, "uslup_gerekce": uslup_gerekce, "okuma": ok.__dict__, "eylem": r.eylem,
                          "ton_gerekce": gerekce, "paragraf": b.paragraf, "kaynak": kaynak}
                 if denetim:
