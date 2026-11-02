@@ -2,7 +2,7 @@
 """
 HIZLI ÇALIŞMA — çözücüyü ONNX'e aktarılabilir yapan, MATEMATİĞİ AYNI yamalar.
 
-İşlemcide sürenin %91'i çözücüde (iSTFTNet; ogrenci/onnxAktar.py ölçer). ONNX
+İşlemcide sürenin %91'i çözücüde (iSTFTNet; ogrenci/aktar/onnxAktar.py ölçer). ONNX
 Runtime'a taşımak için iki parça değişir, sonuç değişmez:
   1) torch.stft / torch.istft (pencere 20, adım 5) → sabit DFT çekirdekli evrişim
      (Kokoro'nun ONNX sürümündeki yol). Kayan nokta farkı dışında birebir.

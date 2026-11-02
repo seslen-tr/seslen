@@ -2,7 +2,7 @@
 """
 ÇÖZÜCÜYÜ ONNX'E AKTAR + DOĞRULA — hız kazancı sesi DEĞİŞTİRMEMELİ.
 
-    python ogrenci/onnxAktar.py cikti/ogrenci/epoch_2nd_00000.pth
+    python ogrenci/aktar/onnxAktar.py cikti/ogrenci/epoch_2nd_00000.pth
 
 Üç sınav (hepsi geçmezse dosya yazılmaz):
   1) Yamalı PyTorch (hizli.py) = özgün PyTorch, aynı tohumla       → SNR ≥ 50 dB
@@ -26,7 +26,7 @@ from pathlib import Path
 import numpy as np
 import torch
 
-KOK = Path(__file__).resolve().parents[1]
+KOK = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(KOK / "ogrenci"))
 sys.path.insert(0, str(KOK / "ogretmen"))
 from hizli import SesAgi, yamala  # noqa: E402

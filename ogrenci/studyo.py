@@ -47,6 +47,8 @@ class Ayar:
     ozdenetim: bool | None = None    # cümleyi dinleyip bozuk sözcüğü onarma (ozdenetim.py); None: SESLEN_OZDENETIM
     difuzyon: bool = True            # cümleye özgü stil (model.cumle_stili); False: sabit ses × duygu stili
     kayit: bool = True               # öğretmen kaydından çal, yoksa sıraya yaz (kayit.py)
+    ezgi: str = "tam"                # öğretmenin ezgisi (ezgi.py): "tam" aynı cümle bankadaysa, "benzer" yoksa en
+                                     # benzer cümleninki, "kapali" hep öğrencinin kendi ezgisi
 
 
 @dataclass
@@ -269,8 +271,10 @@ class Studyo:
         self._Cozumleyici = Cozumleyici
         self.telaffuz = Telaffuz()
         self._ozdenetim = None
+        from ezgi import Banka
         from kayit import Kayit
         self.kayit = Kayit()
+        self.ezgi = Banka()
 
     def ses_modeli(self, ses: str):
         return self._ozel.get(ses, self.model)
@@ -373,6 +377,12 @@ class Studyo:
                         s = model.cumle_stili(cumle, s)
                     ayarlar = {"hiz": b.hiz or ok.hiz, "perde": ayar.perde, "tonlama": ok.tonlama,
                                "virgul_ms": ok.virgul_ms}
+                    if ayar.ezgi != "kapali":       # öğretmenin ezgisi (ezgi.py): aynı cümle ya da benzeri
+                        ezgi, ezgi_bilgi = self.ezgi.bul(ayar.ses, model.g2p(cumle, vurgu=model.vurgu), ton,
+                                                         ayar.ezgi, model.temiz.word_index_dictionary)
+                        if ezgi is not None:
+                            ayarlar["ezgi"] = ezgi
+                            kaynak = "ogrenci+ogretmen_ezgisi"
                     if self.ozdenetim_acik(ayar):
                         w, denetim = self.ozdenetim().uret(model, ayar.ses, cumle, s, notr=notr, **ayarlar)
                     else:
@@ -383,6 +393,8 @@ class Studyo:
                          "ton_gerekce": gerekce, "paragraf": b.paragraf, "kaynak": kaynak}
                 if denetim:
                     bilgi["ozdenetim"] = denetim
+                if kaynak == "ogrenci+ogretmen_ezgisi":
+                    bilgi["ezgi"] = ezgi_bilgi
                 if b_i == 0 and r_i == 0 and uyarilar:
                     bilgi["uyarilar"] = uyarilar
                 yield Parca(metin_r, w, sessizlik, ton, round(float(y), 2), bilgi)

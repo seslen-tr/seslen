@@ -9,7 +9,7 @@ metin hazırlama ([turkce-normalize](https://github.com/seslen-tr/turkce-normali
 ([turkce-plbert](https://github.com/seslen-tr/turkce-plbert)), duygu seçimi
 ([turkce-duygu](https://github.com/seslen-tr/turkce-duygu)), üslup ([turkce-uslup](https://github.com/seslen-tr/turkce-uslup));
 ölçüm için [turkce-tts-sinav](https://github.com/seslen-tr/turkce-tts-sinav). Bu modelin açık, PyTorch'suz sürümü
-[seslen-tts](https://github.com/seslen-tr/seslen-tts)'tir (6 açık ses; `ogrenci/acikAktar.py` hazırlar, bkz.
+[seslen-tts](https://github.com/seslen-tr/seslen-tts)'tir (6 açık ses; `ogrenci/aktar/acikAktar.py` hazırlar, bkz.
 [YAYIN.md](YAYIN.md)). Başka projeden nasıl kullanılacağı: [Başka projelerde](#başka-projelerde).
 
 ## Kullanım
@@ -54,6 +54,11 @@ metin hazırlama ([turkce-normalize](https://github.com/seslen-tr/turkce-normali
   `python ogrenci/kayit.py dinle` → `dinle.html`). Okuma ayarları (hız, perde, duygu şiddeti, üslup, tonlama,
   virgül) elle değiştirilince kayıt kullanılmaz; ton elle seçildiyse (ayar ya da `[işaret]`) yalnız o tonun kaydı
   çalar, yoksa öğrenci okur ve cümle o tonla sıraya girer.
+- **Ezgi** (`ogrenci/ezgi.py`, "Gelişmiş ayarlar"): sesi öğrenci üretir, ezgiyi (hece süreleri, perde çizgisi)
+  öğretmenin kaydından alır. **Öğretmen (aynı cümle)**, varsayılan: öğretmen bu cümleyi bu tonla okuduysa onun
+  ezgisi, yoksa öğrencininki. **Benzer cümle** (deneysel): yoksa hece yapısı en benzer öğretmen cümlesinin ezgisi.
+  **Öğrenci**: hep öğrencinin kendi ezgisi. Hız, perde ve tonlama ayarları ezginin üstüne uygulanır; ezgi
+  kullanılınca çözücü PyTorch'ta çalışır (~2× yavaş). Ölçümler: Model › Ezgi bankası.
 - **İndir:** WAV ya da MP3.
 - **API:** `POST /v1/audio/speech` (OpenAI ses ucu biçimi, WAV/MP3), `GET /v1/voices`, `POST /api/okunus`,
   `POST /api/uslup` (yazarken otomatik üslup önizlemesi), telaffuz uçları; ayrıntı ve örnekler sitenin "API"
@@ -105,6 +110,7 @@ Seslen'in parçaları ayrı ayrı kullanılabilir; hangisi yetiyorsa o alınır:
 | 3b | Metin içi işaretler, telaffuz sözlüğü | Hepsinin üstüne yazar; sözlük yalnız modele giden metne uygulanır |
 | 4 | turkce-normalize + turkce-vurgu | Sayı, tarih, kısaltma → yazı; vurgu işaretli okunuş (`anˈtaɫjada`) |
 | 5 | StyleTTS2 metin tarafı (PyTorch) | Türkçe PL-BERT, süre ve perde tahmini (~40 ms) |
+| 5b | Ezgi bankası (`ogrenci/ezgi.py`) | Öğretmen bu cümleyi okuduysa hece süreleri ve perde çizgisi onun kaydından (bkz. Model › Ezgi bankası) |
 | 6 | StyleTTS2 çözücü (ONNX) | Ses dalgası; perde ve tonlama burada uygulanır |
 
 Ton, sesin stil vektörüdür (256 sayı: 128 akustik + 128 tonlama). Her ses × ton için eğitim
@@ -196,6 +202,38 @@ nötrden 1,4 kat uzaklaştırılır (`studyo.TON_KAZANC`; UTMOS değişmedi).
 
 **Hız** (i7-12700H, 6 iş parçacığı): RTF ≈ 0,22 (1 sn ses ≈ 0,22 sn); stüdyoda ilk cümle ≈ 0,9 sn.
 
+**Ezgi bankası** (02.11.2026, [ogrenci/ezgi.py](ogrenci/ezgi.py), eğitim yok). Öğrencinin sesi iyi ama ezgisi düz;
+öğretmen ise 35 bin cümlede ezgiyi doğru yapmış. Öğretmenin kayıtları öğrencinin **kendi hizalayıcısıyla** (eğitimde
+gerçek süreleri bulan `text_aligner` + tekdüze en iyi yol) öğrencinin işaretlerine bağlanır, perdesi öğrencinin
+perde çıkarıcısıyla (JDC) alınır. Her hece için süre ve 5 noktalı perde çizgisi bankaya yazılır
+(`python ogrenci/ezgi.py banka`, `cikti/ezgi/<ses>.npz`; gerçek kişi verisi ve doğrulama listesi alınmaz). Konuşurken
+hece süreleri öğrencininkiyle yarı yarıya karıştırılır (konuşma hızı korunur), perde çizgisi çözücüye giden F0'a
+hece hece uygulanır; ses rengi, enerji ve sesli/sessiz ayrımı öğrencinin.
+
+[araclar/deney/prozodi.py](araclar/deney/prozodi.py), eğitimde ve bankada olmayan 30 cümle (6 ses × 5). "r": hece
+perdesinin / süresinin öğretmenin aynı cümledeki okuyuşuyla ilişkisi (1 = aynı ezgi):
+
+| Okuyuş | Perde r | Süre r | Takılan (CTC) | UTMOS |
+|---|---|---|---|---|
+| Öğrenci | 0,61 | 0,83 | 11 / 30 | 3,13 |
+| Öğrenci + aynı cümlenin öğretmen ezgisi (**tam**) | **0,91** | **0,92** | 12 / 30 | 3,08 |
+| Öğrenci + benzer cümlenin ezgisi (**benzer**) | 0,40 | 0,64 | 13 / 30 | 2,94 |
+| Öğretmen | 1 | 1 | 8 / 30 | 2,78 |
+
+- Öğrenci öğretmenin ezgisini bozulmadan taşıyor: perde uyumu 0,61 → 0,91, anlaşılırlık ve UTMOS hemen hemen aynı
+  (UTMOS duyguyu ölçmüyor: öğretmene öğrenciden düşük puan veriyor).
+- Başka bir cümlenin ezgisi, hece yapısı en benzer olsa da, ölçüde öğrencinin kendi tahmininden kötü. Kulakla
+  (kullanıcı, 02.11): "aynı cümle" ve "benzer cümle" okuyuşları güzel, ama **öğretmen gibi değil**. Bu yüzden
+  varsayılan "tam", "benzer" deneysel.
+- Sonuç: öğrencinin eksiği yalnız ezgi değil. Ezgi öğretmeninki olunca da ses öğretmen gibi duyulmuyor; fark sesin
+  dokusunda (nefes, canlılık, ses rengi ayrıntısı).
+
+**Sonraki sürüm: cilacı** (plan). Elimizde aynı cümlenin hem öğretmen hem öğrenci okuyuşu binlerce kez var. Öğrenci
+öğretmenin hece süreleriyle okutulunca (ezgi bankasının yaptığı gibi) iki ses kare kare üst üste biner: mükemmel
+hizalı çiftler. Bu çiftlerle küçük ve hızlı bir "cilacı" model (ses iyileştirme türünden; yeni bir ses modeli değil)
+yalnız aradaki farkı öğrenir: öğrenci okur → cilacı birkaç milisaniyede öğretmene yaklaştırır. Aynı 30 cümleyle,
+aynı ölçülerle ve kulakla ezgi bankasıyla karşılaştırılacak; daha iyiyse bir sonraki sürümde o konacak.
+
 ## Bilinen tuzaklar
 
 - **Cümle başı dolgusu:** model baştaki dolgu işaretine 250–300 ms süre verip bazen orayı sesle
@@ -214,12 +252,12 @@ nötrden 1,4 kat uzaklaştırılır (`studyo.TON_KAZANC`; UTMOS değişmedi).
 ogretmen/        VoxCPM2 öğretmen: kadro.py (sesler), duygu.py (ton tarifleri), yukle.py, veriUret.py
                  (+ adayMetin.json), korpusYap.py (derlem), kadroYap.py + tazeleYap.py (yeni ses seçim sayfaları),
                  serdarDene.py (tarif denemesi)
-ogrenci/         StyleTTS2 öğrenci: model.py, hizli.py + onnxAktar.py, studyo.py (işaretler, telaffuz, okunuş),
+ogrenci/         StyleTTS2 öğrenci: model.py, hizli.py, studyo.py (işaretler, telaffuz, okunuş),
                  ozdenetim.py (cümleyi dinleyip bozuk sözcüğü onarma, öğrenilen onarımlar), kayit.py (öğretmen
-                 kaydı ve arka plan işçisi),
+                 kaydı ve arka plan işçisi), ezgi.py (öğretmenin ezgi bankası: kurma, arama, uygulama),
                  studyoSunucu.py (sunucu ve API) + site/ (index.html, stil.css, uygulama.js),
-                 veri/ (veriHazirla.py, vurguListe.py), dinle.py, acikAktar.py (açık seslen-tts model klasörü),
-                 g2p.py (turkce-vurgu'ya yönlendirir)
+                 veri/ (veriHazirla.py, vurguListe.py), aktar/ (onnxAktar.py: çözücü ONNX'e, acikAktar.py: açık
+                 seslen-tts model klasörü), dinle.py, g2p.py (turkce-vurgu'ya yönlendirir)
 ogrenci/StyleTTS2/  yl4579/StyleTTS2 kopyası + Utils/ ağırlıkları + Models/LJSpeech/config.yml (gitignore)
 araclar/olcu/    ortak ölçü: olcu.py (Whisper, netlik), dogallik.py (UTMOS), kelimeGuven.py, denetim.py (dil modelsiz
                  CTC ile sözcük telaffuz puanı ve fazladan ses), sinav.py (her modelde 16 ses × 273 cümle: veri/sinav/),
@@ -283,7 +321,7 @@ python bulut/kiralik/asama3_yeni.py hepsi        # eğitim makinesi: aç, kur, y
 python bulut/kiralik/runpod.py egit-izle         # tur ağırlıklarını indirir; bitince makineyi siler
 python bulut/kiralik/runpod.py egit-kurtar       # kendini durdurmuş makineyi açıp son ağırlığı indirir
 python ogrenci/dinle.py cikti/ogrenci/t10-epoch_2nd_00000.pth      # t10-stiller.npz + dinleti/ogrenci.html
-python ogrenci/onnxAktar.py cikti/ogrenci/t10-epoch_2nd_00000.pth  # t10-ses.onnx (üç sınavla)
+python ogrenci/aktar/onnxAktar.py cikti/ogrenci/t10-epoch_2nd_00000.pth  # t10-ses.onnx (üç sınavla)
 ```
 
 Türkçe PL-BERT'in yerel klasörü `TURKCE_PLBERT` ortam değişkeniyle değiştirilebilir (varsayılan
@@ -299,7 +337,7 @@ python bulut/kiralik/yenile.py veri              # veriHazirla.py + vurguListe.p
 python bulut/kiralik/yenile.py liste             # ağırlıklı liste → veri/egitim_vurgu_t6
 python bulut/kiralik/yenile.py egit              # ağ kontrolü (SSH portu kapalıysa kiralamaz), makine, izleme → t6-*.pth
 python ogrenci/dinle.py cikti/ogrenci/t6-epoch_2nd_00000.pth       # t6-stiller.npz
-python ogrenci/onnxAktar.py cikti/ogrenci/t6-epoch_2nd_00000.pth   # t6-ses.onnx
+python ogrenci/aktar/onnxAktar.py cikti/ogrenci/t6-epoch_2nd_00000.pth   # t6-ses.onnx
 ```
 
 Masraf, takvim ve öğrenci seçiminin gerekçesi: [YOL.md](YOL.md). Seslen kodu MIT ([LICENSE](LICENSE)); kullanılan modellerin ve verilerin lisansları: [LISANSLAR.md](LISANSLAR.md). Ürün sesleri Damla ve Kuzey açık depoda yoktur (`kullanici/ozel_sesler.json` ile eklenir).

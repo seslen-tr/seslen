@@ -85,7 +85,7 @@ git push https://github.com/seslen-tr/seslen.git acik:main
 ```
 
 Açık ses modeli hazır: `Masaüstü/ses_projeleri/seslen-tts`.
-- Çıkarım PyTorch'suz, yalnız ONNX Runtime ile. `ogrenci/acikAktar.py` metin tarafını ONNX'e aktardı; Seslen'in
+- Çıkarım PyTorch'suz, yalnız ONNX Runtime ile. `ogrenci/aktar/acikAktar.py` metin tarafını ONNX'e aktardı; Seslen'in
   yoluyla eşdeğerlik birebir, ONNX farkı ≤1,3·10⁻⁵.
 - Model klasörü: `cikti/acik/seslen-tts/` (326 MB + `ornekler/`). Yalnız 6 açık ses var; `hf/yukle.py` ürün sesi
   görürse yüklemeyi reddeder. seslen-tts'te yükleme model klasörüyle çağrılır:

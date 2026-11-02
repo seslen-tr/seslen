@@ -90,7 +90,7 @@ class Ogrenci:
         """vurgu: okunuşa vurgu işareti (ˈ) koy. None: ağırlığın yanındaki ayardan anla — 3. aşama
         (t3-*.pth, Türkçe PL-BERT) vurgulu listeyle eğitildi. PL-BERT'in yapısı iki dilde aynı;
         eğitilmiş ağırlıkları zaten net["bert"] içinde.
-        onnx: çözücü için cikti/ogrenci/<önek>ses.onnx varsa onu kullan (ogrenci/onnxAktar.py; ~2× hızlı,
+        onnx: çözücü için cikti/ogrenci/<önek>ses.onnx varsa onu kullan (ogrenci/aktar/onnxAktar.py; ~2× hızlı,
         sesi değiştirmediği orada sınanır)."""
         torch.set_num_threads(is_parcacigi)
         self.is_parcacigi = is_parcacigi
@@ -254,22 +254,27 @@ class Ogrenci:
 
     @torch.no_grad()
     def konus(self, metin: str, stil: np.ndarray, hiz: float = 1.0, perde: float = 1.0, tonlama: float = 1.0,
-              virgul_ms: int = 0, okunus: str | None = None, uzat: list[tuple[int, int, float]] | None = None
-              ) -> np.ndarray:
+              virgul_ms: int = 0, okunus: str | None = None, uzat: list[tuple[int, int, float]] | None = None,
+              ezgi: dict | None = None) -> np.ndarray:
         """hiz > 1 hızlı; perde: F0 çarpanı (ince-kalın); tonlama: perde dalgalanması çarpanı;
         virgul_ms: virgülde ek duraklama. Son üçü stüdyo kaydırıcıları ve üslup (turkce-uslup) ayarları.
-        okunus / uzat: özdenetimin onarımları (bkz. hazirla)."""
+        okunus / uzat: özdenetimin onarımları (bkz. hazirla). ezgi: öğretmenin hece süreleri ve perde çizgisi
+        (ezgi.Banka.bul); verilince çözücü PyTorch'ta çalışır (F0'a erişmek için; ~2× yavaş)."""
         from hizli import egri_carpani, tonla
         m = self.model
         okunus = self.g2p(metin, vurgu=self.vurgu) if okunus is None else okunus
         bitis = self._kisa_bitis(metin, okunus)
         if bitis:
             okunus += self._tasiyici_okunus()
+        if ezgi is not None:
+            from ezgi import sure_uzat
+            hiza0 = self.hazirla(metin, stil, hiz, virgul_ms, okunus, uzat)[2]
+            uzat = list(uzat or []) + sure_uzat(self, okunus, hiza0[0].sum(-1).long().numpy(), ezgi)
         d, t_en, hiza, s, ref, egri = self.hazirla(metin, stil, hiz, virgul_ms, okunus, uzat)
         if bitis:
             sure = hiza[0].sum(-1).long()
             bitis = (int(sure[:bitis + 1].sum()) + 1) * 600            # son harften sonra 25 ms
-        if self.oturum is not None:
+        if self.oturum is not None and ezgi is None:
             g = dict(zip(("d", "t_en", "hiza", "s", "ref"), (x.numpy() for x in (d, t_en, hiza, s, ref))))
             g |= {"perde": np.array([perde], np.float32), "tonlama": np.array([tonlama], np.float32)}
             if "egri" in self._onnx_girdi:          # soru ezgisinden önce aktarılmış .onnx'te bu girdi yok
@@ -278,6 +283,9 @@ class Ogrenci:
         else:
             f0, nn = m.predictor.F0Ntrain(d.transpose(-1, -2) @ hiza, s)
             f0 = f0 * egri_carpani(egri, hiza)
+            if ezgi is not None:
+                from ezgi import perde_uygula
+                f0 = perde_uygula(self, f0, hiza, okunus, ezgi)
             out = m.decoder(t_en @ hiza, tonla(f0, torch.tensor([perde]), torch.tensor([tonlama])), nn, ref)
             w = out.squeeze().numpy()[..., :-50]        # sondaki tık
         if bitis:

@@ -14,7 +14,7 @@ oldukları için eşdeğeri düz yazılır ve Seslen'in kendi yoluyla (model.Ogr
   sesler.json     ses adı, görünen ad, açıklama, tonlar
   semboller.json  okunuş karakteri → işaret numarası (StyleTTS2 TextCleaner)
 
-    python ogrenci/acikAktar.py [ağırlık]
+    python ogrenci/aktar/acikAktar.py [ağırlık]
 """
 from __future__ import annotations
 
@@ -26,7 +26,7 @@ from pathlib import Path
 import numpy as np
 import torch
 
-KOK = Path(__file__).resolve().parents[1]
+KOK = Path(__file__).resolve().parents[2]
 sys.path[:0] = [str(KOK / "ogrenci"), str(KOK / "ogretmen")]
 ACIK_SESLER = ["ayse", "zeynep", "emre", "fatma", "hasan", "koca"]
 YASAK = {"damla", "kuzey"}                     # ürün sesleri

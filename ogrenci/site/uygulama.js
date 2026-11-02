@@ -23,7 +23,11 @@ const ORNEK = {
 const ISARET_AD = { notr: "nötr", neseli: "neşeli", heyecan: "heyecan", uyari: "uyarı", merak: "merak", ozur: "özür", uzgun: "üzgün", kizgin: "kızgın", fisilti: "fısıltı" };
 
 let BILGI = null;
-const VARSAYILAN = { ses: "zeynep", ton: "otomatik", yogunluk: null, perde: 1, uslup: "otomatik", hiz: null, tonlama: null, duraklama_ms: null, virgul_ms: null };
+const VARSAYILAN = { ses: "zeynep", ton: "otomatik", yogunluk: null, perde: 1, uslup: "otomatik", hiz: null, tonlama: null, duraklama_ms: null, virgul_ms: null, ezgi: "tam" };
+// öğretmenin ezgisi (ogrenci/ezgi.py): hece süreleri ve perde çizgisi öğretmenin kaydından
+const EZGI = [["kapali", "Öğrenci", "Ezgiyi öğrenci kendisi tahmin eder"],
+  ["tam", "Öğretmen (aynı cümle)", "Öğretmen bu cümleyi okuduysa onun ezgisi, yoksa öğrencininki"],
+  ["benzer", "Benzer cümle", "Yoksa yapısı en benzer öğretmen cümlesinin ezgisi (deneysel)"]];
 let A = { ...VARSAYILAN };
 
 // ── tema ────────────────────────────────────────────────────────
@@ -116,6 +120,15 @@ function kaydiriciKur() {
     g.addEventListener("dblclick", () => { A[k.id] = k.oto ? null : 1; kaydiriciCiz(k); });
     if (k.oto) $(k.id + "Oto").onclick = () => { A[k.id] = A[k.id] === null ? Number(g.value) : null; kaydiriciCiz(k); };
   }
+  const d = document.createElement("div");
+  d.className = "kaydirici";
+  d.innerHTML = `<div class="k-ust"><span class="ad">Ezgi</span><span class="deger" id="ezgiDeger"></span></div><div class="secenekler" id="ezgiSecim"></div>`;
+  $("gelismisKaydiricilar").appendChild(d);
+}
+function ezgiCiz() {
+  $("ezgiSecim").innerHTML = EZGI.map(([k, ad, alt]) => `<button class="secenek${A.ezgi === k ? " secili" : ""}" data-ezgi="${k}" title="${esc(alt)}">${esc(ad)}</button>`).join("");
+  $("ezgiDeger").textContent = (EZGI.find((e) => e[0] === A.ezgi) || EZGI[1])[2];
+  $("ezgiSecim").querySelectorAll("[data-ezgi]").forEach((b) => b.onclick = () => { A.ezgi = b.dataset.ezgi; ezgiCiz(); yerel.koy("sa.ayar", JSON.stringify(A)); });
 }
 function kaydiriciCiz(k) {
   const g = $(k.id), oto = k.oto && A[k.id] === null;
@@ -153,6 +166,7 @@ function ayarCiz() {
     ...Object.entries(BILGI.usluplar).map(([k, u]) => `<button class="secenek${A.uslup === k ? " secili" : ""}" data-uslup="${k}">${esc(buyuk(u.ad))}</button>`)].join("");
   $("usluplar").querySelectorAll("[data-uslup]").forEach((b) => b.onclick = () => { A.uslup = b.dataset.uslup; ayarCiz(); });
   KAYDIRICI.forEach(kaydiriciCiz);
+  ezgiCiz();
   yerel.koy("sa.ayar", JSON.stringify(A));
 }
 $("sifirla").onclick = () => { A = { ...VARSAYILAN, ses: A.ses }; ayarCiz(); };
@@ -349,7 +363,7 @@ async function seslendir() {
           uslupCiz(kayit, ` · ilk ses ${((performance.now() - t0) / 1000).toFixed(1)} sn`);
         }
         const ses = await ctx.decodeAudioData(Uint8Array.from(atob(p.wav), (c) => c.charCodeAt(0)).buffer);
-        const parca = { cumle: p.cumle, ton: p.ton, yogunluk: p.yogunluk, sessizlik_ms: p.sessizlik_ms, neden: p.bilgi.ton_gerekce, paragraf: p.bilgi.paragraf || 0, ses };
+        const parca = { cumle: p.cumle, ton: p.ton, yogunluk: p.yogunluk, sessizlik_ms: p.sessizlik_ms, neden: p.bilgi.ton_gerekce + (p.bilgi.kaynak === "ogretmen" ? " · öğretmen kaydı" : p.bilgi.ezgi ? (p.bilgi.ezgi.ezgi === "ayni_cumle" ? " · öğretmenin ezgisi" : " · benzer cümleden öğretmen ezgisi") : ""), paragraf: p.bilgi.paragraf || 0, ses };
         const n = kayit.parcalar.push(parca) - 1;
         if (aktif === kayit) {
           cumleEkle(parca, n, kayit);
