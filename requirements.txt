@@ -7,7 +7,7 @@ turkce-vurgu>=0.1.2
 turkce-duygu>=0.1.1
 turkce-uslup>=0.1.0
 turkce-tts-sinav>=0.1.1     # ön uç sınavı: araclar/olcu/onuc.py
-seslen-tts>=0.3.0           # makale sınavı: araclar/olcu/makale.py
+seslen-tts>=0.3.1           # makale sınavı: araclar/olcu/makale.py
 # Öğrenci (StyleTTS2 metin tarafı PyTorch, çözücü ONNX) ve CTC denetimi (wav2vec2):
 torch>=2.4
 torchaudio>=2.4

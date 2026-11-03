@@ -110,7 +110,8 @@ def soru_egrisi(okunus: str, sozluk: dict) -> np.ndarray:
 def sessizlik_ekle(w: np.ndarray, sure: np.ndarray, duraklar: list[tuple[int, int]], son: int = 0,
                    pay: int = SON_PAY) -> np.ndarray:
     """Dalga: son > 0 ise son harften (işaret sırası son) pay birim sonra kesilir, son birimde söner; duraklar
-    noktalamanın ilk biriminden sonra sessizlik olarak eklenir (seslen-tts model.sessizlik_ekle ile aynı)."""
+    noktalamanın başına (önceki sözcüğün bitişine) sessizlik olarak eklenir; sonra eklenince sonraki sözcüğün başı
+    iki kez duyuluyordu ("yyetmiş", "rrögar"; seslen-tts model.sessizlik_ekle ile aynı)."""
     sinir = np.cumsum(sure) * 600                           # her işaretin bittiği örnek (birim = 600 örnek)
     w = np.array(w, dtype=np.float32).reshape(-1)
     if son:
@@ -119,7 +120,7 @@ def sessizlik_ekle(w: np.ndarray, sure: np.ndarray, duraklar: list[tuple[int, in
         w[len(w) - n:] *= np.linspace(1, 0, n, dtype=w.dtype)
     parca, bas = [], 0
     for i, birim in duraklar:
-        p = int(sinir[i - 1]) + min(int(sure[i]), 1) * 600
+        p = int(sinir[i - 1])
         if p >= len(w):
             break
         n = min(GECIS, p - bas, len(w) - p)
