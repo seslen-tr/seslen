@@ -28,7 +28,8 @@ def olc(yaz: bool = True) -> dict:
     from turkce_vurgu.g2p import sozcuk_okunusu
     from turkce_vurgu.vurgu import vurgulu_hece
 
-    sozcukler = lambda t: re.sub(r"[^\w\s]", "", kucuk(t)).split()
+    # tire sözcük sınırıdır (seste "Ar-Ge" = "ar ge"); öteki noktalama sayılmaz
+    sozcukler = lambda t: re.sub(r"[^\w\s]", "", re.sub(r"[-–‐‑]", " ", kucuk(t))).split()
     n = normalizasyon_sinavi(normallestir, yaz=False)
     fark = [y for y in n["yanlislar"] if sozcukler(y[1]) != sozcukler(y[2])]
     v = vurgu_sinavi(lambda w, ozel: vurgulu_hece(kucuk(w), ozel), yaz=False)

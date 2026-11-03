@@ -10,7 +10,8 @@ oldukları için eşdeğeri düz yazılır ve Seslen'in kendi yoluyla (model.Ogr
 Çıktı (cikti/acik/seslen-tts/):
   metin.onnx      girdi tokens (1, L) int64, stil (1, 256) → d (1, L, C), t_en (1, 512, L), sure (L,)
   ses.onnx        çözücü (onnxAktar.py çıktısı, soru ezgisi girdisi "egri" ile)
-  stiller.npz     yalnız AÇIK seslerin ses × ton stil vektörleri (ürün sesleri Damla/Kuzey ASLA girmez)
+  stiller.npz     açık seslerin ses × ton stil vektörleri. Ürün sesleri (kullanici/ozel_sesler.json, git dışında)
+                  yalnız orada "acik_ad" ile açık bir ad verilmişse o adla girer; yerel adları ve tarifleri girmez.
   sesler.json     ses adı, görünen ad, açıklama, tonlar
   semboller.json  okunuş karakteri → işaret numarası (StyleTTS2 TextCleaner)
 
@@ -28,8 +29,13 @@ import torch
 
 KOK = Path(__file__).resolve().parents[2]
 sys.path[:0] = [str(KOK / "ogrenci"), str(KOK / "ogretmen")]
-ACIK_SESLER = ["ayse", "zeynep", "emre", "fatma", "hasan", "koca"]
-YASAK = {"damla", "kuzey"}                     # ürün sesleri
+OZEL = KOK / "kullanici" / "ozel_sesler.json"
+_ozel = json.loads(OZEL.read_text(encoding="utf-8")) if OZEL.exists() else {}
+YASAK = set(_ozel.get("kadro", {})) | {"damla", "kuzey"}      # ürün seslerinin yerel adları açık dosyalarda geçmez
+ACIK_AD = _ozel.get("acik_ad", {})                            # yerel ad → açık modeldeki ad
+GORUNEN_ACIK = _ozel.get("acik_gorunen", {})
+ACIK_SESLER = [*ACIK_AD, "ayse", "serdar", "zeynep", "emre", "selin", "fatma", "hasan", "elif", "can", "ece",
+               "pitircik", "koca", "firfir", "kara"]
 CUMLE = ["Tamam.", "Bugün hava çok güzel, parka gidelim mi?",
          "Ankara'dan gelen ekip, yarın sabah saat dokuzda İzmir'e geçecek; rapor da o zaman tamamlanacak."]
 HEDEF = KOK / "cikti" / "acik" / "seslen-tts"
@@ -95,7 +101,7 @@ def main() -> int:
     from model import Ogrenci
     from yukle import sureci_hazirla
     sureci_hazirla()
-    assert not YASAK & set(ACIK_SESLER), "ürün sesi açık listeye girmez"
+    assert not YASAK & {ACIK_AD.get(s, s) for s in ACIK_SESLER}, "yerel ad açık listeye girmez"
     agirlik = Path(sys.argv[1]) if len(sys.argv) > 1 else KOK / "cikti" / "ogrenci" / "t10-epoch_2nd_00000.pth"
     o = Ogrenci(agirlik, onnx=False)
     agi = MetinAgi(o.model).eval()
@@ -131,13 +137,18 @@ def main() -> int:
     # 3) çözücü, açık seslerin stilleri, ses bilgileri, sembol tablosu
     shutil.copy(KOK / "cikti" / "ogrenci" / f"{o.onek}ses.onnx", HEDEF / "ses.onnx")
     v = np.load(KOK / "cikti" / "ogrenci" / f"{o.onek}stiller.npz")
-    stiller = {k: v[k] for k in v.files if k.split("/")[0] in ACIK_SESLER}
+    stiller = {f"{ACIK_AD.get(s, s)}/{t}": v[k] for k in v.files for s, t in [k.split("/")] if s in ACIK_SESLER}
     assert not any(k.split("/")[0] in YASAK for k in stiller)
     np.savez(HEDEF / "stiller.npz", **stiller)
     from studyoSunucu import GORUNEN, _aciklama
-    sesler = {s: {"gorunen": GORUNEN.get(s, s.capitalize()), "tur": KADRO[s]["tur"],
-                  "aciklama": _aciklama(KADRO[s]["aciklama"]),
-                  "tonlar": sorted(k.split("/")[1] for k in stiller if k.startswith(s + "/"))} for s in ACIK_SESLER}
+    sesler = {}
+    for s in ACIK_SESLER:
+        a = ACIK_AD.get(s, s)
+        sesler[a] = {"gorunen": GORUNEN_ACIK.get(a) or GORUNEN.get(s, s.capitalize()), "tur": KADRO[s]["tur"],
+                     "aciklama": _aciklama(KADRO[s]["aciklama"]),
+                     "tonlar": sorted(k.split("/")[1] for k in stiller if k.startswith(a + "/"))}
+    import re
+    assert not YASAK & set(re.findall(r"\w+", json.dumps(sesler, ensure_ascii=False).lower())), "yerel ad sızdı"
     (HEDEF / "sesler.json").write_text(json.dumps(sesler, ensure_ascii=False, indent=1), encoding="utf-8")
     (HEDEF / "semboller.json").write_text(json.dumps(o.temiz.word_index_dictionary, ensure_ascii=False), encoding="utf-8")
     boy = sum(f.stat().st_size for f in HEDEF.iterdir()) / 1e6

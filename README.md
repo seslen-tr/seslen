@@ -9,7 +9,7 @@ metin hazırlama ([turkce-normalize](https://github.com/seslen-tr/turkce-normali
 ([turkce-plbert](https://github.com/seslen-tr/turkce-plbert)), duygu seçimi
 ([turkce-duygu](https://github.com/seslen-tr/turkce-duygu)), üslup ([turkce-uslup](https://github.com/seslen-tr/turkce-uslup));
 ölçüm için [turkce-tts-sinav](https://github.com/seslen-tr/turkce-tts-sinav). Bu modelin açık, PyTorch'suz sürümü
-[seslen-tts](https://github.com/seslen-tr/seslen-tts)'tir (6 açık ses; `ogrenci/aktar/acikAktar.py` hazırlar, bkz.
+[seslen-tts](https://github.com/seslen-tr/seslen-tts)'tir (16 ses; `ogrenci/aktar/acikAktar.py` hazırlar, bkz.
 [YAYIN.md](YAYIN.md)). Başka projeden nasıl kullanılacağı: [Başka projelerde](#başka-projelerde).
 
 ## Kullanım
@@ -19,6 +19,16 @@ metin hazırlama ([turkce-normalize](https://github.com/seslen-tr/turkce-normali
 - **Metin** yazın, **Seslendir**'e basın (Ctrl+Enter). Cümleler hazır oldukça çalınır (ilk ses ~1 sn).
   Her cümlenin duygusu ve neden seçildiği listede görünür. Uzun metin (en çok 50.000 karakter) paragraf
   paragraf işlenir; boş satır yeni paragraf, arası daha uzun durulur.
+- **Makale ve belge:** Markdown ya da HTML (makale, rapor, README) olduğu gibi yapıştırılabilir. Başlık, liste,
+  tablo, bağlantı ve kod işaretleri okunmaz, yapıları cümleye çevrilir (turkce-normalize `okunur_metin`: "1. madde"
+  → "Birincisi: …", tablo satır satır). Haber, bilgi, deneme ve talimat üslubunda duygu sabit ve hafif kalır; 12
+  sözcükten uzun cümle virgülden parçalara bölünür (model uzun cümlede sesleri kaydırıyor: genel metinden 38 uzun
+  cümlede takılan 17 → bölmeyle 14 → bölme + özdenetimle 5, 04.11'de 17 / 17 / 7; model koşudan koşuya ±3 oynuyor,
+  [araclar/deney/bolme.py](araclar/deney/bolme.py)); her
+  cümle sesin doğal hızında, birden hızlanan bölüm yavaşlatılarak okunur; virgülde en az 125 ms, iki noktada 200 ms,
+  cümle sonunda 450 ms durulur. Duraklama dalgaya sessizlik olarak eklenir, cümle son harften 50 ms sonra kesilir
+  (noktalamanın süresi uzatılınca model boşluğu sesle dolduruyordu: "İkincisi:" → "ikincisihe"). Sınavı:
+  `python araclar/olcu/makale.py [belge.md …] --esik`.
 - **Ses:** 16 sesten biri ("Sesler" sayfasında dinlenir). **Duygu:** otomatik (cümleye göre) ya da bütün metin
   tek duyguda. **Üslup:** otomatik ya da haber, bilgi, talimat, deneme, anlatı, masal, sohbet.
   Hız, perde ve duygu şiddeti kaydırıcıyla; tonlama ve duraklamalar "Gelişmiş ayarlar"da.
@@ -228,11 +238,33 @@ perdesinin / süresinin öğretmenin aynı cümledeki okuyuşuyla ilişkisi (1 =
 - Sonuç: öğrencinin eksiği yalnız ezgi değil. Ezgi öğretmeninki olunca da ses öğretmen gibi duyulmuyor; fark sesin
   dokusunda (nefes, canlılık, ses rengi ayrıntısı).
 
-**Sonraki sürüm: cilacı** (plan). Elimizde aynı cümlenin hem öğretmen hem öğrenci okuyuşu binlerce kez var. Öğrenci
-öğretmenin hece süreleriyle okutulunca (ezgi bankasının yaptığı gibi) iki ses kare kare üst üste biner: mükemmel
-hizalı çiftler. Bu çiftlerle küçük ve hızlı bir "cilacı" model (ses iyileştirme türünden; yeni bir ses modeli değil)
-yalnız aradaki farkı öğrenir: öğrenci okur → cilacı birkaç milisaniyede öğretmene yaklaştırır. Aynı 30 cümleyle,
-aynı ölçülerle ve kulakla ezgi bankasıyla karşılaştırılacak; daha iyiyse bir sonraki sürümde o konacak.
+**Öğretmenden fark nerede? (cilacı öncesi teşhis, 02–03.11.2026).** Plan, öğrencinin sesini öğretmene yaklaştıran
+bir "cilacı" eğitmekti; önce farkın yeri ölçüldü (aynı 30 cümle; benzerlik: öğretmen kaydıyla WavLM-SV konuşmacı
+benzerliği, MCD: göreli mel-kepstrum uzaklığı).
+
+| Okuyuş ([araclar/deney/doku.py](araclar/deney/doku.py)) | Benzerlik | MCD |
+|---|---|---|
+| Öğrenci | 0,927 | 66,8 |
+| Öğrenci + öğretmen ezgisi (tam) | 0,929 | 64,7 |
+| Çözücüye öğretmenin hizası | 0,933 | 67,5 |
+| … + öğretmenin perdesi (F0) | 0,957 | 58,3 |
+| … + öğretmenin pürüzsüzleştirilmiş perdesi | 0,955 | 58,9 |
+| … + enerji (N) | 0,959 | 56,7 |
+| … + kaydın kendi stili | 0,972 | 46,6 |
+| Aynı sesin başka bir öğretmen kaydı | 0,910 | — |
+
+- **Çözücü yeterli; fark perdede.** Öğretmenin perdesi verilince öğrenci öğretmene, öğretmenin kendi başka kaydından
+  daha çok benziyor. Pürüzsüz perde de aynı işi görüyor: ince oynama değil, **düzey** önemli.
+- **Düzey:** öğrenci cümleyi öğretmenden ortalama 3,3 yarım ton farklı düzeyde okuyor (Kuzey +3,9, Serdar +3,5).
+  Cümleye özgü düzeyi öğretmenle r ≈ 0,5 ilişkili (yönü doğru), ama değişimi yarı genişlikte: cümleler arası sapma
+  öğrencide 1,9, öğretmende 3,4 yarım ton (ortalamaya eğitilen tahmincinin düzleşmesi).
+- **Eğitimsiz düzeltmeler** ([araclar/deney/duzey.py](araclar/deney/duzey.py), [araclar/deney/cesitlilik.py](araclar/deney/cesitlilik.py)):
+  ses × ton sabit kayma benzerliği 0,927 → 0,937 yapıyor (kulak, 03.11: "bazısı iyi bazısı kötü"); küresel varyans
+  (GV) düzeltmesi çeşitliliği 1,9 → 2,6'ya çıkarıyor ama benzerlik aynı (0,938); difüzyon stilinin payını
+  artırmak çeşitliliği az artırıp takılanı üçe katlıyor (β 0,4 → 1,0: 11 → 29 / 30). Hiçbiri sürüme girmedi.
+- **Sonuç:** öğretmenin cümleden cümleye düzey değiştirmesi büyük ölçüde rastlantısal (öğretmen her cümleyi
+  örnekleyerek üretiyor); ortalamaya eğitilen bir cilacı da onu öğrenemez. Cilacı eğitimi bu yüzden ertelendi; olası
+  yol örneklemeli (üretici) bir perde modeli.
 
 ## Bilinen tuzaklar
 
@@ -257,15 +289,18 @@ ogrenci/         StyleTTS2 öğrenci: model.py, hizli.py, studyo.py (işaretler,
                  kaydı ve arka plan işçisi), ezgi.py (öğretmenin ezgi bankası: kurma, arama, uygulama),
                  studyoSunucu.py (sunucu ve API) + site/ (index.html, stil.css, uygulama.js),
                  veri/ (veriHazirla.py, vurguListe.py), aktar/ (onnxAktar.py: çözücü ONNX'e, acikAktar.py: açık
-                 seslen-tts model klasörü), dinle.py, g2p.py (turkce-vurgu'ya yönlendirir)
+                 seslen-tts model klasörü, acikOlc.py: onun ölçümü ve örnekleri, denetimAktar.py:
+                 okunuş tanıyıcısı ONNX'e, 8 bit, seslen-tts özdenetimi için), dinle.py, g2p.py (turkce-vurgu'ya yönlendirir)
 ogrenci/StyleTTS2/  yl4579/StyleTTS2 kopyası + Utils/ ağırlıkları + Models/LJSpeech/config.yml (gitignore)
 araclar/olcu/    ortak ölçü: olcu.py (Whisper, netlik), dogallik.py (UTMOS), kelimeGuven.py, denetim.py (dil modelsiz
                  CTC ile sözcük telaffuz puanı ve fazladan ses), sinav.py (her modelde 16 ses × 273 cümle: veri/sinav/),
-                 onuc.py (metin yolu: turkce-tts-sinav ile metin hazırlama, vurgu, okunuş; GitHub testi)
+                 onuc.py (metin yolu: turkce-tts-sinav ile metin hazırlama, vurgu, okunuş; GitHub testi),
+                 makale.py (makale sınavı: belgeyi seslen-tts yoluyla okur; kalan işaret, CTC, hız, duygu)
 .github/         test.yml: derleme + onuc.py, kardeş projelerin PyPI sürümleriyle
 requirements.txt  stüdyo · requirements-atolye.txt  öğretmen, kayıt işçisi, eğitim
 araclar/deney/   karşılaştırma ve teşhis: tonOlc.py, zayifTeshis.py, soruOlc.py, zincir.py, yolKarsilastir.py
-                 (modellerin ve 1. yolun dinleme sayfası)
+                 (modellerin ve 1. yolun dinleme sayfası), bolme.py (uzun cümleyi bölmek, özdenetim), prozodi.py (ezgi bankası), doku.py (öğretmenden fark
+                 nerede), duzey.py (perde düzeyi: sabit kayma, GV), cesitlilik.py (difüzyon stilinin payı)
 bulut/modal/     Modal (aylık 30 $ ücretsiz kredi, yalnız HTTPS): egitModal.py (yükle, hız denemesi, ayrık eğitim, izle, indir)
 bulut/kiralik/   RunPod: runpod.py (aç, üret, eğit, izle, kurtar), plbert.py (Türkçe PL-BERT makinesi), plan.py +
                  uret.py (üretim), egitim/ (ayar.py: config_tr.yml, sitecustomize.py, yama.py: ara kayıt + sürdürme),

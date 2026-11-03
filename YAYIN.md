@@ -13,7 +13,9 @@ gönderildi; depoların herkese açık olup olmadığı buradan görünmüyor. P
   - [x] GitHub (kuruluş `seslen-tr`),
   - PyPI (iki adımlı doğrulama açık),
   - Hugging Face (yazma anahtarı).
-- [ ] **Ürün sesleri açılmaz.** Damla ve Kuzey'in kaydı, stil vektörü ve örneği hiçbir açık depoya girmez.
+- [ ] **Ürün seslerinin yerel adları ve tarifleri açılmaz.** Damla ve Kuzey adı, tarifi ve kaydı hiçbir açık depoya
+  girmez; açık modelin sesleri `ogrenci/aktar/acikAktar.py`'nin verdiği açık adlarla çıkar (eşleme
+  `kullanici/ozel_sesler.json`'da, git dışında), `hf/yukle.py` yerel adı görürse reddeder.
 
 ## 1. Kütüphaneler
 
@@ -87,8 +89,8 @@ git push https://github.com/seslen-tr/seslen.git acik:main
 Açık ses modeli hazır: `Masaüstü/ses_projeleri/seslen-tts`.
 - Çıkarım PyTorch'suz, yalnız ONNX Runtime ile. `ogrenci/aktar/acikAktar.py` metin tarafını ONNX'e aktardı; Seslen'in
   yoluyla eşdeğerlik birebir, ONNX farkı ≤1,3·10⁻⁵.
-- Model klasörü: `cikti/acik/seslen-tts/` (326 MB + `ornekler/`). Yalnız 6 açık ses var; `hf/yukle.py` ürün sesi
-  görürse yüklemeyi reddeder. seslen-tts'te yükleme model klasörüyle çağrılır:
+- Model klasörü: `cikti/acik/seslen-tts/` (326 MB + `ornekler/`, isteğe bağlı `denetim.onnx` 356 MB). 0.3.0'dan
+  beri 16 ses; `hf/yukle.py` yerel ürün sesi adı görürse yüklemeyi reddeder. seslen-tts'te yükleme model klasörüyle çağrılır:
   `python hf/yukle.py <model klasörü> [--acik]`.
 - 26.10: seslen-tts 0.2.0, `cikti/acik/seslen-tts/` t10 ağırlığından aktarıldı; eski aktarımlar
   `cikti/acik/seslen-tts-t6/` (0.1.0) ve `seslen-tts-t3/`. Paket yoluyla 6 ses × 14 cümle: UTMOS t6'ya göre
@@ -97,6 +99,9 @@ Açık ses modeli hazır: `Masaüstü/ses_projeleri/seslen-tts`.
   v0.2.0; 0.2.1 (kısa cümle taşıyıcısı) GitLab ve GitHub'da, model aynı. 01.11: PyPI'da 0.2.1 (turkce-normalize
   0.1.3 ile); temiz ortamda `pip install seslen-tts` PyTorch'suz 139 MB, Zeynep 7,1 sn sesi 2,9 sn'de üretti.
 - Temiz ortamda kurulum sınandı: PyTorch yok, ortam 155 MB, komut satırı aracı çalışıyor, Whisper birebir doğru.
+- 04.11: seslen-tts 0.3.0 (16 ses, makale okuma, PyTorch'suz özdenetim), turkce-normalize 0.1.4 ve turkce-vurgu
+  0.1.2 PyPI'da, GitLab ve GitHub'da; Hugging Face'e gizli yüklendi (özdenetim tanıyıcısı dahil). Yayından önce
+  `araclar/olcu/makale.py --esik` ve `araclar/olcu/onuc.py --esik`.
 - Ses klonlama yok (bilerek).
 
 Yayın sırası (girişlerden sonra):

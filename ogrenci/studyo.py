@@ -19,6 +19,7 @@ Arayüz: ogrenci/studyoSunucu.py (http://127.0.0.1:8780).
 """
 from __future__ import annotations
 
+import dataclasses
 import json
 import re
 import sys
@@ -78,6 +79,39 @@ SES_AGIRLIK: dict[str, str] = {}
 # (1,0: 3,24 · 1,3: 3,26 · 1,5: 3,18), anlaşılırlık aynı. Merakta da aynı (perde +1,5 → +2,0, öğretmen +2,6; soru
 # tepesi +1,9 → +2,4; UTMOS 2,68 → 2,66). Duygu şiddeti kaydırıcısı bunun üstüne çarpar.
 TON_KAZANC = {("damla", "uyari"): 1.4, ("damla", "merak"): 1.4}
+# BELGE OKUMA (03.11): makaleler Markdown'dı; işaretler okundu, tablo tek cümle oldu, duygu cümle cümle sıçradı
+# ("izin gerekmez" kızgın), hız 4,6–7,3 hece/sn oynadı. Biçimli metin turkce_normalize.okunur_metin ile cümle yapısına
+# çevrilir; bu üsluplarda duygu sabit ve hafif (güçlü duygu yok, belirsizse nötr, en çok BELGE_YOGUNLUK); kısa cümle
+# (başlık, madde) nötr; uzun cümle bölünür; her cümle sesin doğal hızının bandına çekilir (model.HIZ_BANDI).
+BELGE_USLUPLARI = {"haber", "bilgi", "deneme", "talimat"}
+BELGEDE_YOK = {"heyecan", "kizgin", "uzgun", "fisilti"}
+BELGE_ESIK, BELGE_YOGUNLUK, BELGE_KISA, UZUN_CUMLE = 0.5, 0.6, 4, 220
+PARCA_SOZCUK, PARCA_MS = 12, 175      # bundan uzun cümle virgülden bölünür; parça arası duraklama (ms; parça sonundaki
+                                      # virgül dalgada kesilir, model.SON_PAY: virgül + 100 ms kadar)
+CUMLE_MS = 450                        # cümle sonunda en az (kulak, 03.11: "noktadan sonra bekleme yok"; noktanın kendi
+                                      # süresi de kesildiği için 400 → 450)
+_BICIMLI = re.compile(r"^\s{0,3}(?:#{1,6}\s|[-*+]\s|\d{1,3}[.)]\s|\|)|<!--|<[a-zA-Z][^>]*>|\*\*|\]\(|```", re.M)
+AYAR_CUMLELERI = ("Bugün hava oldukça güzel ve güneşli görünüyor.", "Toplantı yarın sabah erken saatte başlayacak.",
+                  "Kitabı okudum ama sonunu pek beğenmedim.", "Yeni proje için ekip arkadaşlarıyla görüştük.",
+                  "Şehrin merkezinde küçük bir kafe açılmış.", "Raporun son bölümünü akşama kadar bitireceğim.")
+
+
+def belge_metni(metin: str) -> str:
+    """Biçimli (Markdown / HTML) metni okunur düz metne çevirir; düz metne dokunmaz (stüdyonun [işaret]leri kalır)."""
+    if not _BICIMLI.search(metin):
+        return metin
+    from turkce_normalize import okunur_metin
+    return okunur_metin(metin)
+
+
+def uzun_cumleyi_bol(cumle: str, en_cok: int = UZUN_CUMLE) -> list[str]:
+    from turkce_normalize import uzun_cumleyi_bol as bol
+    return bol(cumle, en_cok)
+
+
+def virgulden_bol(cumle: str) -> list[str]:
+    from turkce_normalize import virgulden_bol as bol
+    return bol(cumle, PARCA_SOZCUK)
 
 
 # ── metin içi işaretler ──────────────────────────────────────────────────────────────────────────────
@@ -230,7 +264,7 @@ def okunus(metin: str, telaffuz: Telaffuz | None = None, en_cok: int = 60) -> li
     from turkce_duygu import cumlelere_bol
     from turkce_vurgu import heceler, normallestir, ozel_kokler, vurgulu_hece
     sonuc = []
-    for c in cumlelere_bol(etiketsiz(metin))[:en_cok]:
+    for c in cumlelere_bol(etiketsiz(belge_metni(metin)))[:en_cok]:
         degisen = []
         okunacak = c
         if telaffuz and telaffuz._desen:
@@ -295,6 +329,16 @@ class Studyo:
     def tonlar(self, ses: str) -> tuple[str, ...]:
         return tuple(k.split("/")[1] for k in self.stiller if k.startswith(f"{ses}/"))
 
+    def dogal_hiz(self, ses: str, ton: str) -> float | None:
+        """Sesin bu tondaki doğal hızı (hece/sn, hız 1): AYAR_CUMLELERI'nin ortancası, bir kez ölçülür."""
+        if not hasattr(self, "_dogal"):
+            self._dogal = {}
+        if (ses, ton) not in self._dogal:
+            m, s = self.ses_modeli(ses), self.stiller[f"{ses}/{ton}"]
+            h = [x for c in AYAR_CUMLELERI if (x := m.hece_hizi(c, s))]
+            self._dogal[(ses, ton)] = float(np.median(h)) if h else None
+        return self._dogal[(ses, ton)]
+
     def okuma(self, metin: str, ayar: Ayar):
         """Üslup ve okuma ayarı (kullanıcının seçtikleri üslubun varsayılanlarını ezer). Uzun metinde üslup
         ilk ~4000 karakterden bulunur."""
@@ -312,12 +356,20 @@ class Studyo:
         mevcut = self.tonlar(ayar.ses)
         if ayar.ses not in self._duygu:
             self._duygu[ayar.ses] = self._Cozumleyici(stiller=mevcut)
+        metin = belge_metni(metin)
         bolumler, uyarilar = etiketleri_coz(metin)
         uslup_ad, ok, uslup_gerekce = self.okuma(etiketsiz(metin), ayar)
         notr = self.stiller[f"{ayar.ses}/notr"]
         for b_i, b in enumerate(bolumler):
             istenen = b.ton if b.ton is not None else ayar.ton
-            sonuclar = self._duygu[ayar.ses].metin_cozumle(akici(b.metin))
+            belge = istenen == "otomatik" and uslup_ad in BELGE_USLUPLARI
+            # uzun cümle virgülden parçalara bölünür (model uzun cümlede sesleri kaydırıyor; genel metinde takılan
+            # 18 → 14 / 40, araclar/deney/bolme.py); parçalar cümlenin tonunu taşır, aralarında PARCA_MS durulur
+            sonuclar, parca_ici = [], []
+            for r in self._duygu[ayar.ses].metin_cozumle(akici(b.metin)):
+                ps = [q for p in virgulden_bol(r.cumle) for q in uzun_cumleyi_bol(p, UZUN_CUMLE)]
+                sonuclar += [dataclasses.replace(r, cumle=p) for p in ps]
+                parca_ici += [j < len(ps) - 1 for j in range(len(ps))]
             # öğretmen kaydı (kayit.py): okuma ayarları elle değiştirilmediyse (öğretmenin kaydı onları izlemez:
             # hız, perde, şiddet, üslup, tonlama, virgül). Ton elle seçildiyse (ayar ya da işaret) yalnız o tonun
             # kaydı çalar. Önce ardışık cümle grupları aranır (hazır kayıtlar birkaç cümle bir arada)
@@ -353,13 +405,19 @@ class Studyo:
                 if (istenen == "otomatik" and uslup_ad == "talimat" and r.eylem not in ("uyari", "yasak")
                         and (r.eylem in ("emir", "rica") or ton == "uyari")):
                     ton, y, gerekce = "notr", 0.0, "talimat üslubunda yönerge adımı düz okunur"
+                if belge and ton != "notr" and (ton in BELGEDE_YOK or y < BELGE_ESIK
+                                                or len(r.cumle.split()) < BELGE_KISA):
+                    ton, y, gerekce = "notr", 0.0, f"{uslup_ad} metninde duygu sabit (belge okuma)"
                 if ton not in mevcut:
                     ton = "notr"
                 s = self.stiller[f"{ayar.ses}/{ton}"]
                 if ton != "notr":        # yoğunluk: nötrden tona doğru (stüdyo "duygu şiddeti")
                     # otomatik tonda 0,5 + çözümleyicinin yoğunluğu (hafif duygu da duyulsun); elle ya da sabit
                     # tonda doğrudan çarpan (1 = tam ton)
-                    k = 0.5 + y if ayar.yogunluk is None and istenen == "otomatik" else y
+                    # (03.11'e kadar 0,5 + y sınırsızdı, 1,5'e çıkıp tonu abartıyordu; belgede en çok BELGE_YOGUNLUK)
+                    k = min(1.0, 0.5 + y) if ayar.yogunluk is None and istenen == "otomatik" else y
+                    if belge and ayar.yogunluk is None:
+                        k = min(k, BELGE_YOGUNLUK)
                     s = notr + k * TON_KAZANC.get((ayar.ses, ton), 1.0) * (s - notr)
                 son, metin_r = r_i, r.cumle
                 cumle, model = cumleler[r_i], self.ses_modeli(ayar.ses)
@@ -368,7 +426,7 @@ class Studyo:
                     son, w = grup[r_i][0] - 1, grup[r_i][1]
                     atla = son + 1
                     metin_r = " ".join(x.cumle for x in sonuclar[r_i:son + 1])
-                sessizlik = ok.duraklama_ms
+                sessizlik = PARCA_MS if parca_ici[son] else max(ok.duraklama_ms, CUMLE_MS)
                 if son == len(sonuclar) - 1 and b.sonra_ms is not None:
                     sessizlik = max(2 * ok.duraklama_ms, 700) if b.sonra_ms == -1 else b.sonra_ms
                 kaynak, denetim = ("ogretmen" if w is not None else "ogrenci"), None
@@ -376,7 +434,7 @@ class Studyo:
                     if ayar.difuzyon:              # cümleye özgü stil (model.DIF_ALFA)
                         s = model.cumle_stili(cumle, s)
                     ayarlar = {"hiz": b.hiz or ok.hiz, "perde": ayar.perde, "tonlama": ok.tonlama,
-                               "virgul_ms": ok.virgul_ms}
+                               "virgul_ms": ok.virgul_ms, "hedef_hece": self.dogal_hiz(ayar.ses, ton)}
                     if ayar.ezgi != "kapali":       # öğretmenin ezgisi (ezgi.py): aynı cümle ya da benzeri
                         ezgi, ezgi_bilgi = self.ezgi.bul(ayar.ses, model.g2p(cumle, vurgu=model.vurgu), ton,
                                                          ayar.ezgi, model.temiz.word_index_dictionary)

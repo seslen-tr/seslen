@@ -36,8 +36,10 @@ BAS_DOLGU = 4          # baştaki dolgu işaretinin en uzun süresi (birim = 25 
 # KISA CÜMLE (27.10): tek başına 1-2 sözcüklük cümleye model sonda uydurma hece ekliyor ("Evet." → "evetnı", "Dikkat!" →
 # "dikkatsınız"; t10 sınavında "kısa" türü %18). Arkasına taşıyıcı cümle eklenip üretilir, ses hizalamadan bilinen son
 # harfte kesilir: 16 ses × 8 kısa cümlede takılan 52 → 10. Sondaki dolguyu sınırlamak (49) ve yalnız kesmek (30) yetmedi.
+# Taşıyıcı "h" ile başlar (03.11): "Bunu…" ile dudak sesi kesimden önce sızıyordu ("Katkı." → "katkım"; seslen-tts'te
+# 4 ses × 20 kısa cümlede birebir duyulan 49 → 71).
 KISA_SOZCUK = 2
-TASIYICI = " Bunu sana daha önce de söylemiştim."
+TASIYICI = " Hem bunu sana daha önce de söylemiştim."
 # CÜMLEYE ÖZGÜ STİL (28.10): sabit ses × duygu vektörü her cümleyi aynı ezgi kalıbıyla okutuyordu. Stil difüzyonu
 # (eğitimde var, çalışma anında kullanılmıyordu) cümlenin PL-BERT çıktısından stil önerir; sesin stiliyle karıştırılır:
 # akustik yarı %10, tonlama yarısı %40 (StyleTTS2 LibriTTS çıkarımı α, β). 4 ses × 6 cümlede takılan 0 → 0, UTMOS
@@ -53,6 +55,26 @@ SORU_TEPE = 6.0
 _SORU_EKI = __import__("re").compile(
     r"^m[ɯiuy](s[ɯiuy]n([ɯiuy]z)?|j[ɯiuy][mz]|d[ɯiuy]ɾ?|jd[ɯiuy](m|n|[ɯiuy]z)?|jmɯʃ|jmiʃ|jmuʃ|jmyʃ)?[?.,!]*$")
 _UNLU = set("aeɯiouøyœæɛɪʊ")
+# HIZ DENGESİ (03.11): model uzun cümleyi hızlı okuyor (21 sözcükte 7,9 hece/sn, 6 sözcükte 5,3; bir makalede "kimi
+# yavaş kimi çok hızlı"). hedef_hece verilince cümlenin ham hızı bunun ±HIZ_BANDI içine çekilir, hiz çarpanı üstüne
+# uygulanır (özdenetimin bilerek yavaşlattığı aday yavaş kalır). Hedef: stüdyonun sesin doğal hızı (studyo.dogal_hiz).
+HIZ_BANDI, HIZ_EN_COK, HIZ_EN_AZ_HECE = 0.07, 1.35, 6
+# YEREL HIZ ve DURAKLAMA (03.11, kulak: "bazı yerlerde çok hızlı okumaya başlıyor", "virgül ve noktaya bazen uyuyor
+# bazen uymuyor"): cümle içinde YEREL_HECE heceli bölüm cümle ortalamasının YEREL_KAT katından hızlıysa yavaşlatılır;
+# virgülde en az VIRGUL_MS, iki noktada en az IKI_NOKTA_MS.
+YEREL_HECE, YEREL_KAT = 4, 1.3
+VIRGUL_MS, IKI_NOKTA_MS = 125, 200
+# DURAKLAMA SESSİZLİKTİR (03.11, Whisper ile 321 makale cümlesi): noktalamanın süresi uzatılınca model o boşluğu sesle
+# dolduruyordu ("İkincisi:" → "ikincisihe", "79 il," → "ile"; baştaki dolguda da aynı, bkz. BAS_DOLGU). Noktalama
+# modelde en çok DURAK_KALAN birim kalır, geri kalanı dalgaya sessizlik olarak eklenir; cümle son harften SON_PAY birim
+# sonra kesilir (seslen-tts model.sessizlik_ekle ile aynı).
+DURAK_KALAN, SON_PAY, GECIS = 2, 2, 120    # birim, birim, örnek (5 ms)
+# HARF HARF OKUNAN KISALTMA (03.11, kulak: "TR-CBS-Komut" → "trcbs komut"): model harf adlarını yapıştırıp hızlı
+# söylüyordu ("terecebese"); art arda harf adları biraz yavaş ve ayrık okunur
+HARF_ADLARI = ("a", "be", "ce", "çe", "de", "e", "fe", "ge", "he", "ı", "i", "je", "ka", "le", "me", "ne", "o", "ö",
+               "pe", "re", "se", "şe", "te", "u", "ü", "ve", "ye", "ze", "kü", "iks")
+HARF_SOZCUK = ("a", "de", "e", "ne", "o", "ye", "be", "ı", "i", "u", "ü", "ö")   # kendisi de sözcük olanlar
+HARF_KAT, HARF_ARA_KAT = 1.3, 2.0
 
 
 def soru_egrisi(okunus: str, sozluk: dict) -> np.ndarray:
@@ -83,6 +105,29 @@ def soru_egrisi(okunus: str, sozluk: dict) -> np.ndarray:
             son = len(onceki) if sonraki is None else max(sonraki - 1, k)
             ek[b0 + v: b0 + son] = SORU_TEPE
     return np.array([e for c, e in zip(okunus, ek) if c in sozluk], np.float32)
+
+
+def sessizlik_ekle(w: np.ndarray, sure: np.ndarray, duraklar: list[tuple[int, int]], son: int = 0,
+                   pay: int = SON_PAY) -> np.ndarray:
+    """Dalga: son > 0 ise son harften (işaret sırası son) pay birim sonra kesilir, son birimde söner; duraklar
+    noktalamanın ilk biriminden sonra sessizlik olarak eklenir (seslen-tts model.sessizlik_ekle ile aynı)."""
+    sinir = np.cumsum(sure) * 600                           # her işaretin bittiği örnek (birim = 600 örnek)
+    w = np.array(w, dtype=np.float32).reshape(-1)
+    if son:
+        w = w[:min(len(w), int(sinir[son]) + pay * 600)]
+        n = min(len(w), 600)
+        w[len(w) - n:] *= np.linspace(1, 0, n, dtype=w.dtype)
+    parca, bas = [], 0
+    for i, birim in duraklar:
+        p = int(sinir[i - 1]) + min(int(sure[i]), 1) * 600
+        if p >= len(w):
+            break
+        n = min(GECIS, p - bas, len(w) - p)
+        w[p - n:p] *= np.linspace(1, 0, n, dtype=w.dtype)
+        w[p:p + n] *= np.linspace(0, 1, n, dtype=w.dtype)
+        parca += [w[bas:p], np.zeros(birim * 600, w.dtype)]
+        bas = p
+    return np.concatenate(parca + [w[bas:]]) if parca else w
 
 
 class Ogrenci:
@@ -192,11 +237,14 @@ class Ogrenci:
     # ── konuş ─────────────────────────────────────────────────────────────
     @torch.no_grad()
     def hazirla(self, metin: str, stil: np.ndarray, hiz: float = 1.0, virgul_ms: int = 0, okunus: str | None = None,
-                uzat: list[tuple[int, int, float]] | None = None):
+                uzat: list[tuple[int, int, float]] | None = None, hedef_hece: float | None = None,
+                duraklar: list[tuple[int, int]] | None = None):
         """Metin tarafı (sürenin ~%5'i): → (d, t_en, hiza, s, ref, egri) — çözücüye (SesAgi) girdiler.
         virgul_ms: virgül / noktalı virgülün süresine eklenen sessizlik (üslup: masal, talimat).
         okunus: hazır okunuş (verilmezse metinden g2p); uzat: [(baş, son, kat)] işaret aralığının süresi çarpılır
-        (özdenetim onarımı, bkz. sozcuk_araliklari). egri: işaret başına perde eki (soru ezgisi, bkz. soru_egrisi)."""
+        (özdenetim onarımı, bkz. sozcuk_araliklari). egri: işaret başına perde eki (soru ezgisi, bkz. soru_egrisi).
+        duraklar: liste verilirse noktalama modelde en çok DURAK_KALAN birim kalır, duraklamanın geri kalanı
+        [(işaret sırası, birim)] olarak buraya eklenir (konus dalgaya sessizlik koyar); verilmezse süre uzatılır."""
         from utils import length_to_mask
         # İş parçacığı sayısı çağıran iş parçacığına özgü (OpenMP): sunucunun istek iş parçacığında yeniden
         # verilmezse 20 çekirdeğin hepsi açılıp ONNX ile çakışıyordu (stüdyoda 2,5× yavaş, 06.10)
@@ -216,22 +264,94 @@ class Ogrenci:
         d_en = m.bert_encoder(m.bert(t, attention_mask=(~maske).int())).transpose(-1, -2)
         d = m.predictor.text_encoder(d_en, s, n, maske)
         x, _ = m.predictor.lstm(d)
-        sure = (torch.sigmoid(m.predictor.duration_proj(x)).sum(axis=-1).squeeze(0) / hiz).round().clamp(min=1).long()
+        ham = torch.sigmoid(m.predictor.duration_proj(x)).sum(axis=-1).squeeze(0)
+        hece = sum(c in _UNLU for c in okunus)
+        if hedef_hece and hece >= HIZ_EN_AZ_HECE:            # hız dengesi (bkz. HIZ_BANDI)
+            oran = hece / max(1e-6, float(ham[1:-1].sum()) * 0.025)
+            alt, ust = hedef_hece * (1 - HIZ_BANDI), hedef_hece * (1 + HIZ_BANDI)
+            if not alt <= oran <= ust:
+                hiz *= float(np.clip((ust if oran > ust else alt) / oran, 1 / HIZ_EN_COK, HIZ_EN_COK))
+        ham = (ham / hiz).numpy().astype(np.float64)
+        if hedef_hece:                                        # yerel hız (bkz. YEREL_KAT)
+            ham = self._yerel_hiz(ham, okunus)
+        ham = torch.from_numpy(self._harf_kumesi(ham, okunus)).float()     # harf harf kısaltma (bkz. HARF_KAT)
+        sure = ham.round().clamp(min=1).long()
         # Baştaki dolgu işaretine model 10-12 birim (250-300 ms) veriyor ve bazen o boşluğu sesle dolduruyordu
         # ("Kayseri" → "Enkai seri", 06.10). 4 birimde sınırlayınca 48 sınama cümlesinin hepsi kusursuz duyuldu.
         sure[0] = sure[0].clamp(max=BAS_DOLGU)
         # bir süre birimi = 2 mel çerçevesi = 600 örnek = 25 ms. Noktalı virgülde en az 200 ms (25.10: atasözünün
         # ikinci yarısı "vardır; sabreden…" bitişik ve hızlı akıyordu; cümleyi bölmek "vardır"ı bozdu)
-        virgul, noktali = self.temiz(","), self.temiz(";")
+        virgul, noktali, iki_nokta = self.temiz(","), self.temiz(";"), self.temiz(":")
+        dogal = {}
         for i, k in enumerate(kod, 1):
+            if k in noktali or k in virgul or k in iki_nokta:
+                dogal[i] = int(sure[i])
             if k in noktali:
                 sure[i] += round(max(virgul_ms, 200) / 25)
-            elif virgul_ms and k in virgul:
-                sure[i] += round(virgul_ms / 25)
+            elif k in virgul:                         # virgülde en az VIRGUL_MS (03.11: model bazen hiç durmuyordu)
+                sure[i] = max(int(sure[i]), round(VIRGUL_MS / 25)) + round(virgul_ms / 25)
+            elif k in iki_nokta:
+                sure[i] = max(int(sure[i]), round(IKI_NOKTA_MS / 25))
         for bas, son, kat in uzat or ():
             sure[bas:son] = (sure[bas:son].float() * kat).round().clamp(min=1).long()
+        if duraklar is not None:                      # duraklamanın fazlası dalgaya sessizlik (bkz. DURAK_KALAN)
+            for i, d0 in dogal.items():
+                kalan = min(d0, DURAK_KALAN, int(sure[i]))
+                if int(sure[i]) > kalan:
+                    duraklar.append((i, int(sure[i]) - kalan))
+                sure[i] = kalan
         hiza = torch.repeat_interleave(torch.eye(n.item()), sure, dim=1).unsqueeze(0)
         return d, t_en, hiza, s, ref, egri
+
+    def _yerel_hiz(self, sure: np.ndarray, okunus: str) -> np.ndarray:
+        """Cümle içinde birden hızlanan bölüm (en az YEREL_HECE heceli ardışık sözcükler) cümlenin sözcüklerdeki
+        ortalama hızının YEREL_KAT katını aşıyorsa yavaşlatılır (seslen-tts SesModeli._yerel_hiz ile aynı)."""
+        sozluk = self.temiz.word_index_dictionary
+        unlu = np.array([0, *[c in _UNLU for c in okunus if c in sozluk], 0], np.float64)
+        araliklar = self.sozcuk_araliklari(okunus)
+        h = sum(unlu[a:b].sum() for a, b in araliklar)
+        d = sum(sure[a:b].sum() for a, b in araliklar)
+        if not araliklar or h < HIZ_EN_AZ_HECE or d <= 0 or len(unlu) != len(sure):
+            return sure
+        sinir = YEREL_KAT * h / d
+        sure, bolum = sure.copy(), []
+        for a, b in araliklar + [(None, None)]:
+            if a is not None:
+                bolum.append((a, b))
+            if bolum and (a is None or sum(unlu[x:y].sum() for x, y in bolum) >= YEREL_HECE):
+                hb, db = sum(unlu[x:y].sum() for x, y in bolum), sum(sure[x:y].sum() for x, y in bolum)
+                if hb >= YEREL_HECE and db > 0 and hb / db > sinir:
+                    for x, y in bolum:
+                        sure[x:y] *= (hb / db) / sinir
+                bolum = []
+        return sure
+
+    def _harf_kumesi(self, sure: np.ndarray, okunus: str) -> np.ndarray:
+        """Harf harf okunan kısaltma ("te re ce be se"): art arda en az iki harf adı, en az biri sözcük olmayan ("ne de"
+        kalır) → harfler HARF_KAT, aralarındaki işaretler HARF_ARA_KAT uzar (seslen-tts model.harf_kumesi ile aynı)."""
+        yalin = lambda o: "".join(c for c in o if c.isalpha() and c not in "ˈː")       # noqa: E731
+        if not hasattr(self, "_harf"):
+            self._harf = ({yalin(self.g2p(a, vurgu=self.vurgu)) for a in HARF_ADLARI},
+                          {yalin(self.g2p(a, vurgu=self.vurgu)) for a in HARF_SOZCUK})
+        harfler, sozcuk = self._harf
+        sozluk = self.temiz.word_index_dictionary
+        sozcukler = [yalin(p) for p in okunus.split(" ") if any(c.isalpha() for c in p if c in sozluk)]
+        araliklar = self.sozcuk_araliklari(okunus)
+        if len(sozcukler) != len(araliklar):
+            return sure
+        harf, sure, i = [s in harfler for s in sozcukler], sure.copy(), 0
+        while i < len(harf):
+            j = i
+            while j < len(harf) and harf[j]:
+                j += 1
+            if j - i >= 2 and any(sozcukler[k] not in sozcuk for k in range(i, j)):
+                for k in range(i, j):
+                    a, b = araliklar[k]
+                    sure[a:b] *= HARF_KAT
+                    if k < j - 1:
+                        sure[b:araliklar[k + 1][0]] *= HARF_ARA_KAT
+            i = max(j, i + 1)
+        return sure
 
     def sozcuk_araliklari(self, okunus: str) -> list[tuple[int, int]]:
         """Okunuştaki her sözcüğün işaret aralığı [baş, son) (baştaki dolgu 0 sayılır; noktalama dahil değil).
@@ -253,9 +373,19 @@ class Ogrenci:
         return araliklar
 
     @torch.no_grad()
+    def hece_hizi(self, metin: str, stil: np.ndarray) -> float | None:
+        """Modelin bu cümleyi hız 1'de kendiliğinden okuyacağı hız (hece/sn; noktalama duraklamaları dahil); kısa
+        cümlede (HIZ_EN_AZ_HECE heceden az) None. studyo.dogal_hiz bununla sesin doğal hızını bulur."""
+        okunus = self.g2p(metin, vurgu=self.vurgu)
+        hece = sum(c in _UNLU for c in okunus)
+        if hece < HIZ_EN_AZ_HECE:
+            return None
+        sure = self.hazirla(metin, stil, okunus=okunus)[2][0].sum(-1)
+        return hece / max(1e-6, float(sure[1:-1].sum()) * 0.025)
+
     def konus(self, metin: str, stil: np.ndarray, hiz: float = 1.0, perde: float = 1.0, tonlama: float = 1.0,
               virgul_ms: int = 0, okunus: str | None = None, uzat: list[tuple[int, int, float]] | None = None,
-              ezgi: dict | None = None) -> np.ndarray:
+              ezgi: dict | None = None, hedef_hece: float | None = None) -> np.ndarray:
         """hiz > 1 hızlı; perde: F0 çarpanı (ince-kalın); tonlama: perde dalgalanması çarpanı;
         virgul_ms: virgülde ek duraklama. Son üçü stüdyo kaydırıcıları ve üslup (turkce-uslup) ayarları.
         okunus / uzat: özdenetimin onarımları (bkz. hazirla). ezgi: öğretmenin hece süreleri ve perde çizgisi
@@ -266,14 +396,13 @@ class Ogrenci:
         bitis = self._kisa_bitis(metin, okunus)
         if bitis:
             okunus += self._tasiyici_okunus()
+        hedef = None if bitis else hedef_hece          # taşıyıcı cümle eklendiyse hece sayısı cümleninki değil
         if ezgi is not None:
             from ezgi import sure_uzat
-            hiza0 = self.hazirla(metin, stil, hiz, virgul_ms, okunus, uzat)[2]
+            hiza0 = self.hazirla(metin, stil, hiz, virgul_ms, okunus, uzat, hedef)[2]
             uzat = list(uzat or []) + sure_uzat(self, okunus, hiza0[0].sum(-1).long().numpy(), ezgi)
-        d, t_en, hiza, s, ref, egri = self.hazirla(metin, stil, hiz, virgul_ms, okunus, uzat)
-        if bitis:
-            sure = hiza[0].sum(-1).long()
-            bitis = (int(sure[:bitis + 1].sum()) + 1) * 600            # son harften sonra 25 ms
+        duraklar: list[tuple[int, int]] = []
+        d, t_en, hiza, s, ref, egri = self.hazirla(metin, stil, hiz, virgul_ms, okunus, uzat, hedef, duraklar)
         if self.oturum is not None and ezgi is None:
             g = dict(zip(("d", "t_en", "hiza", "s", "ref"), (x.numpy() for x in (d, t_en, hiza, s, ref))))
             g |= {"perde": np.array([perde], np.float32), "tonlama": np.array([tonlama], np.float32)}
@@ -288,11 +417,19 @@ class Ogrenci:
                 f0 = perde_uygula(self, f0, hiza, okunus, ezgi)
             out = m.decoder(t_en @ hiza, tonla(f0, torch.tensor([perde]), torch.tensor([tonlama])), nn, ref)
             w = out.squeeze().numpy()[..., :-50]        # sondaki tık
-        if bitis:
-            w = w[..., :bitis].copy()
-            n = min(w.shape[-1], 600)
-            w[..., -n:] *= np.linspace(1, 0, n, dtype=w.dtype)          # 25 ms sönüm
-        return w
+        # kısa cümlede taşıyıcıdan önce son harften 25 ms sonra, başka cümlede SON_PAY birim sonra kesilir
+        return sessizlik_ekle(w, hiza[0].sum(-1).long().numpy(), duraklar, bitis or self._son_harf(okunus),
+                              1 if bitis else SON_PAY)
+
+    def _son_harf(self, okunus: str) -> int:
+        """Son harfin işaret sırası (baştaki dolgu 0); harf yoksa 0."""
+        if not hasattr(self, "_harfsiz"):
+            self._harfsiz = {i for c, i in self.temiz.word_index_dictionary.items() if not c.isalpha()}
+        kod = self.temiz(okunus)
+        son = len(kod)
+        while son and kod[son - 1] in self._harfsiz:
+            son -= 1
+        return son
 
     def _tasiyici_okunus(self) -> str:
         if not hasattr(self, "_tasiyici"):

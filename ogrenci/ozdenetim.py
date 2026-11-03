@@ -39,10 +39,13 @@ import numpy as np
 KOK = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(KOK / "araclar" / "olcu"))
 ACIK = os.environ.get("SESLEN_OZDENETIM", "1") != "0"
-ESIK_SUPHE = -1.5            # bu GOP'un altında tanıyıcının harf hatası da bozuk sayılır ("sessizi" −2,3 geçiyordu)
+ESIK_SUPHE = -0.8            # bu GOP'un altında tanıyıcının harf hatası da bozuk sayılır ("sessizi" −2,3; 03.11: "rögarları" → "rogarları" −0,94 geçiyordu, −1,5 idi)
 YAVAS = {"yavas": 1.3, "yavas2": 1.6}
 UNLU_KAT = 2.0
-ONARIMLAR = ("yavas", "yavas2", "unlu", "vurgusuz", "durak", "notr", "hiz")
+# STİL SAPMASI (03.11): süre ve vurgu onarımları ünlü kaymasını ("giriş" → "geriş") düzeltemiyordu; stile küçük, tohumu
+# sabit bir sapma (SAPMA × stilin std'si) sözcüğü yeniden söyletir (seslen-tts denetim.SAPMA ile aynı ölçü ve değer).
+SAPMA = 0.1
+ONARIMLAR = ("yavas", "yavas2", "unlu", "vurgusuz", "durak", "notr", "hiz", "sapma0", "sapma1")
 _HARF = re.compile(r"[a-zçğıöşüâîû]+")
 _UNLU = set("aeıioöuüâîû")
 _IPA_UNLU = set("aeɯioøuyœæɛ")
@@ -178,9 +181,13 @@ class Ozdenetim:
 
     @staticmethod
     def _cumle_onar(onarim: str, okunus: str, uzat, hiz: float, stil, notr):
-        """Cümle düzeyinde onarım (notr, hiz) → (okunus, uzat, stil, hiz) ya da None."""
+        """Cümle düzeyinde onarım (notr, hiz, sapmaN) → (okunus, uzat, stil, hiz) ya da None."""
         if onarim == "notr":
             return None if notr is None or np.allclose(stil, notr) else (okunus, uzat, notr, hiz)
+        if onarim.startswith("sapma"):                            # bkz. SAPMA
+            s = np.asarray(stil, np.float32)
+            r = np.random.default_rng(int(onarim[5:]))
+            return okunus, uzat, s + SAPMA * s.std() * r.standard_normal(s.shape).astype(np.float32), hiz
         return okunus, uzat, stil, hiz * 0.9                      # hiz
 
     # ── üret ──────────────────────────────────────────────────────────────────────────────────────────
@@ -205,7 +212,7 @@ class Ozdenetim:
         unlu = yanlis_unluler(ref, d["duyulan"])
         en_iyi = (ceza, w, None, ilk_bozuk, d)
         for onarim in ONARIMLAR:
-            if onarim in ("notr", "hiz"):
+            if onarim in ("notr", "hiz") or onarim.startswith("sapma"):
                 a = self._cumle_onar(onarim, temel[0], temel[1], hiz, stil, notr)
                 ad = onarim
             else:
