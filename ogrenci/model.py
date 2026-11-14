@@ -44,6 +44,8 @@ TASIYICI = " Hem bunu sana daha önce de söylemiştim."
 # (eğitimde var, çalışma anında kullanılmıyordu) cümlenin PL-BERT çıktısından stil önerir; sesin stiliyle karıştırılır:
 # akustik yarı %10, tonlama yarısı %40 (StyleTTS2 LibriTTS çıkarımı α, β). 4 ses × 6 cümlede takılan 0 → 0, UTMOS
 # 3,13 → 3,25, cümle başına +0,2 sn; kulakla "şimdikinden iyi" (duygu yine öğretmende). α 0,3 / β 0,7 okunuşu bozdu (9/24).
+# 14.11.2026'dan beri stüdyoda kapalı (studyo.Ayar.difuzyon): 30 görülmemiş cümlede perdeyi öğretmene göre ortalama
+# 1,9 yarım ton yükseltiyordu; sabit stil benzerlikte 0,928 → 0,943, kulakla "sabit stil daha iyi" (README, "Ezgici").
 DIF_ALFA, DIF_BETA, DIF_ADIM = 0.1, 0.4, 5
 # SORU EZGİSİ (09.10): evet/hayır sorusunda ezginin tepesi soru ekinden (mı/mi/mu/mü + kişi ekleri) önceki sözcüğün
 # vurgulu hecesindedir ("yardımcı olaBİLİR misin?", "ANkara mı?"; Göksel & Kerslake §21.2). Öğretmen bunu yapıyor

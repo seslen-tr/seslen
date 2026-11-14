@@ -124,8 +124,9 @@ Seslen'in parçaları ayrı ayrı kullanılabilir; hangisi yetiyorsa o alınır:
 | 6 | StyleTTS2 çözücü (ONNX) | Ses dalgası; perde ve tonlama burada uygulanır |
 
 Ton, sesin stil vektörüdür (256 sayı: 128 akustik + 128 tonlama). Her ses × ton için eğitim
-kayıtlarının ortalamasından bir kez çıkarılır (`cikti/ogrenci/t10-stiller.npz`); stüdyoda cümleye özgü difüzyon stiliyle karıştırılır. Yoğunluk nötrden tona
-doğru kaydırmadır.
+kayıtlarının ortalamasından bir kez çıkarılır (`cikti/ogrenci/t10-stiller.npz`). Yoğunluk nötrden tona doğru
+kaydırmadır. Cümleye özgü difüzyon stili (`Ayar.difuzyon`, `model.cumle_stili`) 14.11.2026'dan beri kapalı: perdeyi
+öğretmene göre ortalama 1,9 yarım ton yükseltiyordu (bkz. "Ezgici").
 
 ## Model
 
@@ -265,6 +266,32 @@ benzerliği, MCD: göreli mel-kepstrum uzaklığı).
 - **Sonuç:** öğretmenin cümleden cümleye düzey değiştirmesi büyük ölçüde rastlantısal (öğretmen her cümleyi
   örnekleyerek üretiyor); ortalamaya eğitilen bir cilacı da onu öğrenemez. Cilacı eğitimi bu yüzden ertelendi; olası
   yol örneklemeli (üretici) bir perde modeli.
+
+**Ezgici: örneklemeli perde modeli (04–14.11.2026, sürüme girmedi).** Ezgi bankası perdeyi cümlenin kendi ortancasına
+göre sakladığı için cümle düzeyi bankada yoktu. 35 bin öğretmen kaydından öğretmenin düzeyi ve öğrencinin aynı cümle
+için ürettiği perde çizgisi çıkarıldı. 700 bin ağırlıklı bir akış eşleme (flow matching) ağı, öğrencinin çizgisine
+eklenecek öğretmen farkının dağılımını öğrendi: cümle düzeyi ve hece hece 5 noktalı perde. Eğitim CPU'da yaklaşık
+1 saat sürdü. Ağ, örneklenen farkı soru ezgisinin yolundan (işaret başına yarım ton) uyguluyordu; kod git geçmişinde
+(`ogrenci/ezgici/`, `ogrenci/aktar/ezgiciAktar.py`).
+
+Aynı 30 görülmemiş cümlede (düzey hatası: öğretmenin aynı cümledeki düzeyinden ortalama sapma, yarım ton):
+
+| Stüdyo okuyuşu | Düzey hatası | Düzey saçılımı | Benzerlik | MCD | UTMOS | Takılan |
+|---|---|---|---|---|---|---|
+| Difüzyon stili (13.11'e kadar) | +1,87 | 1,94 | 0,928 | 68,7 | 3,11 | 11 / 30 |
+| + ezgici (sıcaklık 0,7) | −0,04 | 2,15 | 0,942 | 67,3 | 3,16 | 11 / 30 |
+| **Sabit stil (şimdiki)** | −0,14 | 2,16 | **0,943** | **66,9** | 3,13 | 10 / 30 |
+| Sabit stil + ezgici | −1,85 | 2,35 | 0,941 | 69,6 | 3,18 | 10 / 30 |
+| Öğretmen | 0 | 3,36 | — | — | — | — |
+
+- Ezgicinin kazancı, difüzyon stilini kapatmakla aynı. 28.10'da tonlamaya canlılık için eklenen difüzyon stili
+  perdeyi ortalama 1,9 yarım ton yükseltiyordu; ezgicinin asıl öğrendiği, bu kaymayı geri almaktı. Sabit stilde o kayma
+  yok, ezgici ters yöne aşırı düzeltiyor. seslen-tts zaten sabit stil kullanıyor: ezgici orada benzerliği 0,943 →
+  0,939, MCD'yi 67,0 → 70,1 yaptı.
+- Kulak (14.11): önce "ezgici öğrenciden iyi", sabit stille karşılaştırınca "sabit stil daha iyi". Stüdyoda
+  difüzyon kapatıldı, ezgici kaldırıldı.
+- Öğretmenin cümleden cümleye düzey çeşitliliğine (3,36) hiçbir seçenek yaklaşmadı. Eğitim verisinden ayrılan
+  cümlelerde ezgici 2,91'e çıkmıştı; görülmemiş cümlede 2,15'te kaldı.
 
 ## Bilinen tuzaklar
 

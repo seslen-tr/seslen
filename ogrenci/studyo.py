@@ -46,7 +46,10 @@ class Ayar:
     duraklama_ms: int | None = None  # cümleler arası; None: üslubunki
     virgul_ms: int | None = None     # virgülde ek duraklama; None: üslubunki
     ozdenetim: bool | None = None    # cümleyi dinleyip bozuk sözcüğü onarma (ozdenetim.py); None: SESLEN_OZDENETIM
-    difuzyon: bool = True            # cümleye özgü stil (model.cumle_stili); False: sabit ses × duygu stili
+    # cümleye özgü stil (model.cumle_stili); False: sabit ses × duygu stili. 14.11.2026'dan beri kapalı: difüzyon
+    # stili perdeyi öğretmene göre ortalama 1,9 yarım ton yükseltiyordu; sabit stilde 30 görülmemiş cümlede öğretmene
+    # benzerlik 0,928 → 0,943, takılan 11 → 10, kulakla "sabit stil daha iyi" (README, "Ezgici")
+    difuzyon: bool = False
     kayit: bool = True               # öğretmen kaydından çal, yoksa sıraya yaz (kayit.py)
     ezgi: str = "tam"                # öğretmenin ezgisi (ezgi.py): "tam" aynı cümle bankadaysa, "benzer" yoksa en
                                      # benzer cümleninki, "kapali" hep öğrencinin kendi ezgisi
