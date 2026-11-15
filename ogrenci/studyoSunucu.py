@@ -86,6 +86,7 @@ class AyarGirdi(BaseModel):
     duraklama_ms: int | None = Field(None, ge=0, le=2000)
     virgul_ms: int | None = Field(None, ge=0, le=800)
     kayit: bool = True                  # öğretmen kaydından çal; False: hep öğrenci (kayit.py karşılaştırması)
+    paragraf_ezgisi: bool = True        # perde paragraf başında yüksek, sonuna doğru alçak (studyo.PARAGRAF_UST)
     ezgi: str = Field("tam", pattern="^(tam|benzer|kapali)$")   # öğretmenin ezgisi (ezgi.py)
 
 

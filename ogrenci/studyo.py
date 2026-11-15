@@ -51,6 +51,7 @@ class Ayar:
     # benzerlik 0,928 → 0,943, takılan 11 → 10, kulakla "sabit stil daha iyi" (README, "Ezgici")
     difuzyon: bool = False
     kayit: bool = True               # öğretmen kaydından çal, yoksa sıraya yaz (kayit.py)
+    paragraf_ezgisi: bool = True     # perde düzeyi paragraf başında yüksek, sonuna doğru alçak (PARAGRAF_UST)
     ezgi: str = "tam"                # öğretmenin ezgisi (ezgi.py): "tam" aynı cümle bankadaysa, "benzer" yoksa en
                                      # benzer cümleninki, "kapali" hep öğrencinin kendi ezgisi
 
@@ -89,6 +90,11 @@ TON_KAZANC = {("damla", "uyari"): 1.4, ("damla", "merak"): 1.4}
 BELGE_USLUPLARI = {"haber", "bilgi", "deneme", "talimat"}
 BELGEDE_YOK = {"heyecan", "kizgin", "uzgun", "fisilti"}
 BELGE_ESIK, BELGE_YOGUNLUK, BELGE_KISA, UZUN_CUMLE = 0.5, 0.6, 4, 220
+# PARAGRAF EZGİSİ (15.11.2026, seslen-tts ile aynı; kulak: "beğendim"): perde düzeyi paragrafın başında yüksek başlar,
+# sona doğru iner, yeni paragrafta yeniden yükselir. Model her cümleyi aynı düzeyde okuyordu. İlk cümle PARAGRAF_UST,
+# son cümle PARAGRAF_ALT yarım ton (arası doğrusal); iki cümlelik paragrafta yarısı; tek cümleliğe dokunulmaz.
+# Alt sınır 0: −1,0'a inen biçimde makale sınavında takılan 4 → 7 oldu (alçaltılan cümleler), 0'da 4 (ezgisizle aynı).
+PARAGRAF_UST, PARAGRAF_ALT = 1.5, 0.0
 PARCA_SOZCUK, PARCA_MS = 12, 175      # bundan uzun cümle virgülden bölünür; parça arası duraklama (ms; parça sonundaki
                                       # virgül dalgada kesilir, model.SON_PAY: virgül + 100 ms kadar)
 CUMLE_MS = 450                        # cümle sonunda en az (kulak, 03.11: "noktadan sonra bekleme yok"; noktanın kendi
@@ -138,6 +144,14 @@ class Bolum:
     hiz: float | None = None        # işaretten gelen hız (None: ayardaki)
     sonra_ms: int | None = None     # bölümden sonra duraklama (işaret ya da paragraf); None: üslubunki
     paragraf: int = 0
+
+
+def paragraf_perdesi(sira: int, n: int) -> float:
+    """Paragrafın sira'ncı cümlesinin (0'dan) perde kayması, yarım ton (bkz. PARAGRAF_UST)."""
+    if n < 2:
+        return 0.0
+    k = min(1.0, (n - 1) / 2)
+    return k * (PARAGRAF_UST + (PARAGRAF_ALT - PARAGRAF_UST) * sira / (n - 1))
 
 
 def _kucuk(s: str) -> str:
@@ -363,16 +377,24 @@ class Studyo:
         bolumler, uyarilar = etiketleri_coz(metin)
         uslup_ad, ok, uslup_gerekce = self.okuma(etiketsiz(metin), ayar)
         notr = self.stiller[f"{ayar.ses}/notr"]
-        for b_i, b in enumerate(bolumler):
-            istenen = b.ton if b.ton is not None else ayar.ton
-            belge = istenen == "otomatik" and uslup_ad in BELGE_USLUPLARI
-            # uzun cümle virgülden parçalara bölünür (model uzun cümlede sesleri kaydırıyor; genel metinde takılan
-            # 18 → 14 / 40, araclar/deney/bolme.py); parçalar cümlenin tonunu taşır, aralarında PARCA_MS durulur
-            sonuclar, parca_ici = [], []
+        # uzun cümle virgülden parçalara bölünür (model uzun cümlede sesleri kaydırıyor; genel metinde takılan
+        # 18 → 14 / 40, araclar/deney/bolme.py); parçalar cümlenin tonunu taşır, aralarında PARCA_MS durulur. Önce bütün
+        # bölümler: paragraf ezgisi paragrafın cümle sayısını ister (bir paragraf işaretlerle birkaç bölüme ayrılabilir)
+        hazir, cumle_say = [], {}
+        for b in bolumler:
+            sonuclar, parca_ici, siralar = [], [], []
             for r in self._duygu[ayar.ses].metin_cozumle(akici(b.metin)):
                 ps = [q for p in virgulden_bol(r.cumle) for q in uzun_cumleyi_bol(p, UZUN_CUMLE)]
+                # harfsiz parça okunmaz: '(… misin?").' bölününce kalan "." model uydurma ses üretiyordu (14.11)
+                ps = [p for p in ps if any(ch.isalnum() for ch in p)]
                 sonuclar += [dataclasses.replace(r, cumle=p) for p in ps]
                 parca_ici += [j < len(ps) - 1 for j in range(len(ps))]
+                siralar += [cumle_say.get(b.paragraf, 0)] * len(ps)
+                cumle_say[b.paragraf] = cumle_say.get(b.paragraf, 0) + (len(ps) > 0)
+            hazir.append((sonuclar, parca_ici, siralar))
+        for b_i, (b, (sonuclar, parca_ici, siralar)) in enumerate(zip(bolumler, hazir)):
+            istenen = b.ton if b.ton is not None else ayar.ton
+            belge = istenen == "otomatik" and uslup_ad in BELGE_USLUPLARI
             # öğretmen kaydı (kayit.py): okuma ayarları elle değiştirilmediyse (öğretmenin kaydı onları izlemez:
             # hız, perde, şiddet, üslup, tonlama, virgül). Ton elle seçildiyse (ayar ya da işaret) yalnız o tonun
             # kaydı çalar. Önce ardışık cümle grupları aranır (hazır kayıtlar birkaç cümle bir arada)
@@ -436,7 +458,8 @@ class Studyo:
                 if w is None:
                     if ayar.difuzyon:              # cümleye özgü stil (model.DIF_ALFA)
                         s = model.cumle_stili(cumle, s)
-                    ayarlar = {"hiz": b.hiz or ok.hiz, "perde": ayar.perde, "tonlama": ok.tonlama,
+                    kayma = paragraf_perdesi(siralar[r_i], cumle_say[b.paragraf]) if ayar.paragraf_ezgisi else 0.0
+                    ayarlar = {"hiz": b.hiz or ok.hiz, "perde": ayar.perde * 2 ** (kayma / 12), "tonlama": ok.tonlama,
                                "virgul_ms": ok.virgul_ms, "hedef_hece": self.dogal_hiz(ayar.ses, ton)}
                     if ayar.ezgi != "kapali":       # öğretmenin ezgisi (ezgi.py): aynı cümle ya da benzeri
                         ezgi, ezgi_bilgi = self.ezgi.bul(ayar.ses, model.g2p(cumle, vurgu=model.vurgu), ton,
@@ -452,6 +475,8 @@ class Studyo:
                         self.kayit.sira_ekle(ayar.ses, ton, cumle, sabit=kayit_ton is not None)
                 bilgi = {"uslup": uslup_ad, "uslup_gerekce": uslup_gerekce, "okuma": ok.__dict__, "eylem": r.eylem,
                          "ton_gerekce": gerekce, "paragraf": b.paragraf, "kaynak": kaynak}
+                if w is not None and kaynak != "ogretmen":
+                    bilgi["paragraf_perde"] = round(kayma, 2)
                 if denetim:
                     bilgi["ozdenetim"] = denetim
                 if kaynak == "ogrenci+ogretmen_ezgisi":

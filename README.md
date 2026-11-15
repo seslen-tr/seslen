@@ -27,8 +27,13 @@ metin hazırlama ([turkce-normalize](https://github.com/seslen-tr/turkce-normali
   [araclar/deney/bolme.py](araclar/deney/bolme.py)); her
   cümle sesin doğal hızında, birden hızlanan bölüm yavaşlatılarak okunur; virgülde en az 125 ms, iki noktada 200 ms,
   cümle sonunda 450 ms durulur. Duraklama dalgaya sessizlik olarak eklenir, cümle son harften 50 ms sonra kesilir
-  (noktalamanın süresi uzatılınca model boşluğu sesle dolduruyordu: "İkincisi:" → "ikincisihe"). Sınavı:
-  `python araclar/olcu/makale.py [belge.md …] --esik`.
+  (noktalamanın süresi uzatılınca model boşluğu sesle dolduruyordu: "İkincisi:" → "ikincisihe"). **Paragraf
+  ezgisi** (15.11.2026): perde düzeyi paragrafın ilk cümlesinde +1,5 yarım ton başlar, son cümlesinde bugünkü düzeye (0) iner,
+  yeni paragrafta yeniden yükselir (−1'e inen biçimde makale sınavında takılan cümle iki makalede 4 → 7 oldu, 0'da
+  4 kaldı; model her cümleyi aynı düzeyde okuyordu; öğretmen verisi cümle cümle üretildiği için
+  bunu öğretemez). Tek cümlelik paragrafa (başlık, madde) dokunulmaz; `Ayar.paragraf_ezgisi`, API'de
+  `paragraf_ezgisi`. Harf ya da rakam içermeyen parça okunmaz ('(… misin?").' sonundaki "." 0,4 sn uydurma ses
+  üretiyordu). Sınavı: `python araclar/olcu/makale.py [belge.md …] --esik`.
 - **Ses:** 16 sesten biri ("Sesler" sayfasında dinlenir). **Duygu:** otomatik (cümleye göre) ya da bütün metin
   tek duyguda. **Üslup:** otomatik ya da haber, bilgi, talimat, deneme, anlatı, masal, sohbet.
   Hız, perde ve duygu şiddeti kaydırıcıyla; tonlama ve duraklamalar "Gelişmiş ayarlar"da.
