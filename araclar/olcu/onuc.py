@@ -6,7 +6,7 @@ geçince Seslen'in metin yolu bozulursa orada görünür.
 
 Ölçülen, stüdyonun gerçekten kullandığı işlevler (kullanıcının telaffuz sözlüğü hariç):
   metin hazırlama  turkce_vurgu.normallestir (turkce-normalize + yabancı adlar; küçük harfe çevirir, model küçük
-                   harfle çalışır: büyük-küçük harf ve noktalama farkı sayılmaz)
+                   harfle çalışır: büyük-küçük harf, noktalama ve boşluk farkı sayılmaz)
   vurgu            turkce_vurgu.vurgu.vurgulu_hece
   okunuş           turkce_vurgu.g2p.sozcuk_okunusu
 
@@ -28,8 +28,9 @@ def olc(yaz: bool = True) -> dict:
     from turkce_vurgu.g2p import sozcuk_okunusu
     from turkce_vurgu.vurgu import vurgulu_hece
 
-    # tire sözcük sınırıdır (seste "Ar-Ge" = "ar ge"); öteki noktalama sayılmaz
-    sozcukler = lambda t: re.sub(r"[^\w\s]", "", re.sub(r"[-–‐‑]", " ", kucuk(t))).split()
+    # noktalama ve boşluk sayılmaz: seste "Ar-Ge" = "ar ge", "tebememe" = "te be me me" (turkce-normalize 0.1.5'ten
+    # beri harf harf okunan kısaltma bitişik yazılıyor; sınav verisi ayrık yazımı bekliyor)
+    sozcukler = lambda t: re.sub(r"[^\w]", "", kucuk(t))
     n = normalizasyon_sinavi(normallestir, yaz=False)
     fark = [y for y in n["yanlislar"] if sozcukler(y[1]) != sozcukler(y[2])]
     v = vurgu_sinavi(lambda w, ozel: vurgulu_hece(kucuk(w), ozel), yaz=False)
@@ -39,7 +40,7 @@ def olc(yaz: bool = True) -> dict:
              "vurgu_literatur": sum(d for d, _ in lit) / sum(t for _, t in lit),
              "vurgu_kesin": v["vikisozluk_kesin"][0] / v["vikisozluk_kesin"][1], "okunus_per": o["per"]}
     if yaz:
-        print(f"metin hazırlama  {n['ornek'] - len(fark)} / {n['ornek']} (harf ve noktalama farkı sayılmadan)")
+        print(f"metin hazırlama  {n['ornek'] - len(fark)} / {n['ornek']} (büyük-küçük harf, noktalama ve boşluk farkı sayılmadan)")
         for girdi, cikti, beklenen in fark:
             print(f"    {girdi!r} → {cikti!r} (beklenen {beklenen!r})")
         print(f"vurgu            literatür kural+Sezer %{100 * sonuc['vurgu_literatur']:.1f} · Vikisözlük kesin "

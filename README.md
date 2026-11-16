@@ -33,7 +33,10 @@ metin hazırlama ([turkce-normalize](https://github.com/seslen-tr/turkce-normali
   4 kaldı; model her cümleyi aynı düzeyde okuyordu; öğretmen verisi cümle cümle üretildiği için
   bunu öğretemez). Tek cümlelik paragrafa (başlık, madde) dokunulmaz; `Ayar.paragraf_ezgisi`, API'de
   `paragraf_ezgisi`. Harf ya da rakam içermeyen parça okunmaz ('(… misin?").' sonundaki "." 0,4 sn uydurma ses
-  üretiyordu). Sınavı: `python araclar/olcu/makale.py [belge.md …] --esik`.
+  üretiyordu). **Kısaltmalar bitişik** (16.11.2026, turkce-normalize 0.1.5): harf harf okunan kısaltma tek sözcük
+  gibi okunur, "TBMM'de" → "tebememede", "TR" → "tere" (ayrık harf adlarında model ünlüleri yutuyordu: "tbmmede",
+  "ap elli"; 18 kısaltma cümlesi × 4 seste takılan 21 → 5, altı makalede 17 → 15).
+  Sınavı: `python araclar/olcu/makale.py [belge.md …] --esik`.
 - **Ses:** 16 sesten biri ("Sesler" sayfasında dinlenir). **Duygu:** otomatik (cümleye göre) ya da bütün metin
   tek duyguda. **Üslup:** otomatik ya da haber, bilgi, talimat, deneme, anlatı, masal, sohbet.
   Hız, perde ve duygu şiddeti kaydırıcıyla; tonlama ve duraklamalar "Gelişmiş ayarlar"da.
