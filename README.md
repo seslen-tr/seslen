@@ -35,7 +35,10 @@ metin hazırlama ([turkce-normalize](https://github.com/seslen-tr/turkce-normali
   `paragraf_ezgisi`. Harf ya da rakam içermeyen parça okunmaz ('(… misin?").' sonundaki "." 0,4 sn uydurma ses
   üretiyordu). **Kısaltmalar bitişik** (16.11.2026, turkce-normalize 0.1.5): harf harf okunan kısaltma tek sözcük
   gibi okunur, "TBMM'de" → "tebememede", "TR" → "tere" (ayrık harf adlarında model ünlüleri yutuyordu: "tbmmede",
-  "ap elli"; 18 kısaltma cümlesi × 4 seste takılan 21 → 5, altı makalede 17 → 15).
+  "ap elli"; 18 kısaltma cümlesi × 4 seste takılan 21 → 5, altı makalede 17 → 15). **Cümle başında "s"**
+  (17.11.2026, seslen-tts 0.3.3): s, ş, f, h ile başlayan cümlede model başta ötümlü mırıltı üretiyordu ("Su" →
+  "zu", "Süt" → "züt"); baştan ilk ünlüye dek 1 kHz altı süzülür (6 ses × 24 cümlede "z" 20 → 3, altı makalede
+  takılan 15 → 9).
   Sınavı: `python araclar/olcu/makale.py [belge.md …] --esik`.
 - **Ses:** 16 sesten biri ("Sesler" sayfasında dinlenir). **Duygu:** otomatik (cümleye göre) ya da bütün metin
   tek duyguda. **Üslup:** otomatik ya da haber, bilgi, talimat, deneme, anlatı, masal, sohbet.

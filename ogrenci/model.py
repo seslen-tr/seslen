@@ -77,6 +77,36 @@ HARF_ADLARI = ("a", "be", "ce", "çe", "de", "e", "fe", "ge", "he", "ı", "i", "
                "pe", "re", "se", "şe", "te", "u", "ü", "ve", "ye", "ze", "kü", "iks")
 HARF_SOZCUK = ("a", "de", "e", "ne", "o", "ye", "be", "ı", "i", "u", "ü", "ö")   # kendisi de sözcük olanlar
 HARF_KAT, HARF_ARA_KAT = 1.3, 2.0
+# BAŞTAKİ MIRILTI (17.11): ötümsüz ünsüzle başlayan cümlede model dolguda ve ünsüzün altında ötümlü mırıltı üretiyor
+# ("Su" → "zu", "Süt" → "züt"); baştan ilk ünlüye dek MIRILTI_HZ altı süzülür (seslen-tts model.bas_mirilti ile aynı;
+# 6 ses × 24 cümlede s → z 20 → 3; yalnız sürtünmeliler, patlamalıda kazanç yok, "panel" → "fanal")
+OTUMSUZ_BAS, MIRILTI_HZ = set("sʃfh"), 1000
+
+
+def bas_mirilti(w: np.ndarray, okunus: str) -> np.ndarray:
+    """Cümle ötümsüz ünsüzle başlıyorsa dalganın başından ilk ünlüye dek MIRILTI_HZ altı süzülür (ünlü başı: ilk
+    400 ms'de 80-500 Hz enerjisinin tepesinin 8 dB altına ilk çıktığı yer). seslen-tts model.bas_mirilti ile aynı."""
+    ilk = next((c for c in okunus if c.isalpha() and c not in "ˈː"), "")
+    if ilk not in OTUMSUZ_BAS or len(w) < 1200:
+        return w
+    pen, f = 300, np.fft.rfftfreq(1024, 1 / ORAN)
+    bant = (f >= 80) & (f < 500)
+    alcak = np.array([10 * np.log10((np.abs(np.fft.rfft(w[i:i + 2 * pen] * np.hanning(2 * pen), 1024)) ** 2)[bant]
+                                    .sum() + 1e-12) for i in range(0, min(len(w) - 2 * pen, 32 * pen) + 1, pen)])
+    v = int(np.argmax(alcak > alcak.max() - 8)) * pen
+    if v <= 0:
+        return w
+    n = min(len(w), v + 2 * GECIS)
+    x = np.asarray(w[:n], np.float64)
+    fx = np.fft.rfftfreq(3 * n, 1 / ORAN)
+    maske = 0.5 - 0.5 * np.cos(np.pi * np.clip((fx - (MIRILTI_HZ - 200)) / 400, 0, 1))
+    yuksek = np.fft.irfft(np.fft.rfft(np.concatenate([np.zeros(n), x, np.zeros(n)])) * maske, 3 * n)[n:2 * n]
+    karis = np.ones(n)
+    a = max(0, v - GECIS)
+    karis[a:] = np.linspace(1, 0, n - a)
+    w = np.array(w, dtype=np.float32)
+    w[:n] = (karis * yuksek + (1 - karis) * x).astype(np.float32)
+    return w
 
 
 def soru_egrisi(okunus: str, sozluk: dict) -> np.ndarray:
@@ -420,6 +450,7 @@ class Ogrenci:
                 f0 = perde_uygula(self, f0, hiza, okunus, ezgi)
             out = m.decoder(t_en @ hiza, tonla(f0, torch.tensor([perde]), torch.tensor([tonlama])), nn, ref)
             w = out.squeeze().numpy()[..., :-50]        # sondaki tık
+        w = bas_mirilti(w.reshape(-1), okunus)          # baştaki "z" (bkz. OTUMSUZ_BAS)
         # kısa cümlede taşıyıcıdan önce son harften 25 ms sonra, başka cümlede SON_PAY birim sonra kesilir
         return sessizlik_ekle(w, hiza[0].sum(-1).long().numpy(), duraklar, bitis or self._son_harf(okunus),
                               1 if bitis else SON_PAY)
