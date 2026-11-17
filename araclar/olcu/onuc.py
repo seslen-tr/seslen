@@ -30,7 +30,12 @@ def olc(yaz: bool = True) -> dict:
 
     # noktalama ve boşluk sayılmaz: seste "Ar-Ge" = "ar ge", "tebememe" = "te be me me" (turkce-normalize 0.1.5'ten
     # beri harf harf okunan kısaltma bitişik yazılıyor; sınav verisi ayrık yazımı bekliyor)
-    sozcukler = lambda t: re.sub(r"[^\w]", "", kucuk(t))
+    # 17.11 (turkce-normalize 0.1.6): alan adındaki "com" "kom", adresteki tek ünsüz harf adıyla okunur ("b" → "be");
+    # sınav verisi eski okunuşu bekliyor, ikisi eşdeğer sayılır
+    from turkce_normalize import harf_oku
+    uzlas = lambda t: re.sub(r"\b([bcçdfgğhjklmnprsştvyz])\b", lambda e: harf_oku(e.group(1)),
+                             re.sub(r"\bcom\b", "kom", t))
+    sozcukler = lambda t: re.sub(r"[^\w]", "", uzlas(kucuk(t)))
     n = normalizasyon_sinavi(normallestir, yaz=False)
     fark = [y for y in n["yanlislar"] if sozcukler(y[1]) != sozcukler(y[2])]
     v = vurgu_sinavi(lambda w, ozel: vurgulu_hece(kucuk(w), ozel), yaz=False)

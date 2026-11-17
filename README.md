@@ -38,7 +38,9 @@ metin hazırlama ([turkce-normalize](https://github.com/seslen-tr/turkce-normali
   "ap elli"; 18 kısaltma cümlesi × 4 seste takılan 21 → 5, altı makalede 17 → 15). **Cümle başında "s"**
   (17.11.2026, seslen-tts 0.3.3): s, ş, f, h ile başlayan cümlede model başta ötümlü mırıltı üretiyordu ("Su" →
   "zu", "Süt" → "züt"); baştan ilk ünlüye dek 1 kHz altı süzülür (6 ses × 24 cümlede "z" 20 → 3, altı makalede
-  takılan 15 → 9).
+  takılan 15 → 9). **Adres, saat, sıfır** (17.11.2026, turkce-normalize 0.1.6): "github.com" → "githab
+  nokta kom" ("com"daki "c" "dʒ" okunuyordu), "06.45'te" → "altı kırk beşte", "TR-042" → "tere sıfır kırk
+  iki", "250 g" → "iki yüz elli gram" (iki makalede takılan 3 → 0).
   Sınavı: `python araclar/olcu/makale.py [belge.md …] --esik`.
 - **Ses:** 16 sesten biri ("Sesler" sayfasında dinlenir). **Duygu:** otomatik (cümleye göre) ya da bütün metin
   tek duyguda. **Üslup:** otomatik ya da haber, bilgi, talimat, deneme, anlatı, masal, sohbet.

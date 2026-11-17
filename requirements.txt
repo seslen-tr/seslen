@@ -2,7 +2,7 @@
 # için: requirements-atolye.txt. Sınanan sürümler 01.11.2026: torch 2.14, onnxruntime 1.30, transformers 5.17,
 # numpy 1.26.
 # Kardeş projeler (github.com/seslen-tr), PyPI'dan:
-turkce-normalize>=0.1.5
+turkce-normalize>=0.1.6
 turkce-vurgu>=0.1.2
 turkce-duygu>=0.1.1
 turkce-uslup>=0.1.0
