@@ -24,7 +24,7 @@ KOK = Path(__file__).resolve().parents[2]
 sys.path[:0] = [str(KOK / "ogrenci"), str(KOK / "araclar" / "olcu")]
 CIKTI = KOK / "cikti" / "prozodi"
 LISTE = KOK / "veri" / "egitim_vurgu_t10"
-SESLER = ["damla", "kuzey", "zeynep", "serdar", "fatma", "emre"]
+SESLER = ["ses_a", "ses_b", "zeynep", "serdar", "fatma", "emre"]
 ORAN = 24000
 _IPA = [("tʃ", "ç"), ("dʒ", "c"), ("ʃ", "ş"), ("ʒ", "j"), ("ɯ", "ı"), ("ɾ", "r"), ("ɫ", "l"), ("ɟ", "g"), ("ɡ", "g"),
         ("c", "k"), ("ø", "ö"), ("y", "ü"), ("j", "y"), ("ɣ", "ğ"), ("ɛ", "e"), ("ɑ", "a"), ("ˈ", ""), ("ː", "")]

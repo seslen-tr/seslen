@@ -8,7 +8,7 @@
 
     from model import Ogrenci
     o = Ogrenci("cikti/ogrenci/epoch_2nd_00000.pth")
-    wav = o.konus("Merhaba!", o.stil_dosyadan("damla", "neseli"))
+    wav = o.konus("Merhaba!", o.stil_dosyadan("ses_a", "neseli"))
 """
 from __future__ import annotations
 
@@ -49,7 +49,7 @@ TASIYICI = " Hem bunu sana daha önce de söylemiştim."
 DIF_ALFA, DIF_BETA, DIF_ADIM = 0.1, 0.4, 5
 # SORU EZGİSİ (09.10): evet/hayır sorusunda ezginin tepesi soru ekinden (mı/mi/mu/mü + kişi ekleri) önceki sözcüğün
 # vurgulu hecesindedir ("yardımcı olaBİLİR misin?", "ANkara mı?"; Göksel & Kerslake §21.2). Öğretmen bunu yapıyor
-# (tepe: Damla +3, Kuzey/Zeynep +4,5 yarım ton), öğrenci düz geçiyordu (araclar/deney/zayifTeshis.py). Kural F0'a o hecede
+# (tepe: Ses A +3, Ses B/Zeynep +4,5 yarım ton), öğrenci düz geçiyordu (araclar/deney/zayifTeshis.py). Kural F0'a o hecede
 # bu kadar yarım ton ekler; çözücüde ~175 ms ile yumuşatıldığı için ölçülen tepe daha küçük (araclar/deney/soruOlc.py: +6 →
 # öğrenci tepesi 0'dan +2..+3'e, UTMOS en çok −0,08, anlaşılırlık aynı). Soru sözcüklü sorulara (ne, neden, kaç…)
 # dokunmaz — onlarda ezgi sonda düşer.

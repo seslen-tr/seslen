@@ -491,7 +491,7 @@ function anaSayfaCiz() {
   });
   $("bilesenler").innerHTML = BILGI.bilesenler.map((b, i) => `<div class="kart bilesen"><span class="sira">${i + 1}</span>
     <div class="ad">${esc(b.ad)}</div><div class="is">${esc(b.is)}</div><span class="olcu">${esc(b.olcu)}</span></div>`).join("");
-  const sec = ["damla", "serdar", "fatma", "pitircik"].map(sesBul).filter(Boolean);
+  const sec = ["ses_a", "serdar", "fatma", "pitircik"].map(sesBul).filter(Boolean);
   $("oneCikan").innerHTML = sec.map((s) => `<div class="kart mini-ses">${avatar(s, 42)}<div class="metin"><div class="ad">${esc(s.gorunen)}</div>
     <div class="ac">${esc(s.aciklama)}</div></div><button class="ikon-dugme" data-mdinle="${s.ad}" title="Dinle">${IKON.dinle}</button>
     <button class="dugme kucuk" data-msec="${s.ad}">Seç</button></div>`).join("");
@@ -533,7 +533,7 @@ print(yanit.headers["X-Tonlar"])  # cümle başına seçilen duygular`,
 if (!yanit.ok) throw new Error(await yanit.text());
 new Audio(URL.createObjectURL(await yanit.blob())).play();`,
   curl: (u) => `# istek.json:
-# {"input": "Merhaba! Bugün hava çok güzel.", "voice": "kuzey", "uslup": "haber"}
+# {"input": "Merhaba! Bugün hava çok güzel.", "voice": "ses_b", "uslup": "haber"}
 
 curl -X POST ${u}/v1/audio/speech \\
   -H "Content-Type: application/json; charset=utf-8" \\

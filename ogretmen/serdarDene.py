@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 SERDAR DUYGU DENEMESİ (08.10) — öğretmen kayıtlarında Serdar'ın neşeli / uyarı / merakı nötrden zor ayrılıyor
-(etki büyüklüğü neşeli 0,74; Damla 2,54): VoxCPM2 "kalın, otoriter, sakin" kimlik kaydını tarife baskın tutmuş.
+(etki büyüklüğü neşeli 0,74; Ses A 2,54): VoxCPM2 "kalın, otoriter, sakin" kimlik kaydını tarife baskın tutmuş.
 Yeniden üretmeden önce hangi tarif ve ayarın duyguyu gerçekten getirdiği burada, işlemcide, birkaç cümleyle denenir.
 
 Her duygu × cümle için: nötr (tarifsiz) · mevcut tarif · güçlü tarif · güçlü tarif + cfg 3 (tarife daha sıkı uyar).

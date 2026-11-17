@@ -18,7 +18,7 @@ import soundfile as sf
 
 KOK = Path(__file__).resolve().parents[2]
 sys.path[:0] = [str(KOK / "ogrenci"), str(KOK / "ogretmen"), str(KOK / "araclar" / "olcu"), str(KOK / "araclar" / "deney")]
-SESLER = ["damla", "serdar", "kuzey", "zeynep", "hasan", "ayse"]
+SESLER = ["ses_a", "serdar", "ses_b", "zeynep", "hasan", "ayse"]
 SORULAR = ["Bana yardımcı olabilir misin?", "Yarın bize gelecek misiniz?", "Bunu sen mi yaptın?",
            "Toplantı saat üçte mi başlıyor?", "Kapıyı kilitledin mi?", "Ankara'ya trenle mi gideceksiniz?",
            "Raporu bitirdiniz mi?", "Bu akşam sinemaya gidelim mi?", "Çay ister misiniz?",

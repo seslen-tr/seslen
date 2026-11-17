@@ -23,7 +23,7 @@ dosyasına kaydet (sohbete / depoya YAZMA).
     python bulut/kaggle/kaggleIs.py iki1 | iki1-indir | iki2 | iki2-indir [--tur tum]   iki aşamalı yapay ses
                                                        (Chatterbox → VoxCPM2); tum: bütün sesler
 
-Kaggle'a giden: derlem metni (CC0 + bizim cümleler), Damla/Kuzey referans
+Kaggle'a giden: derlem metni (CC0 + bizim cümleler), Ses A/Ses B referans
 kaydı (tariften tasarlanmış, kimseye ait değil), ölçü kodu. Veri seti ÖZEL.
 """
 from __future__ import annotations
@@ -40,7 +40,7 @@ BURASI = Path(__file__).resolve().parent
 IS = KOK / "cikti" / "kaggle"
 # kaggle.exe değil: başlatıcı .exe kurulduğu yolu gömüyor, klasör taşınınca (07.10 sesatolye → seslen) bozuldu
 KAGGLE = [str(KOK / ".venv" / "Scripts" / "python.exe"), "-c", "from kaggle.cli import main; main()"]
-SESLER = {"damla": "damla-4", "kuzey": "kuzey-1"}      # ogretmen/veriUret.py ile aynı seçim
+SESLER = {"ses_a": "ses_a-4", "ses_b": "ses_b-1"}      # ogretmen/veriUret.py ile aynı seçim
 VERI_SETI = "sesatolye-girdi"
 CEKIRDEK = "sesatolye-uretim"
 TASARIM = "sesatolye-tasarim"
@@ -238,7 +238,7 @@ DENE_ADAYLAR = {
     "chatterbox": {"A1_chatterbox_hasan6_aksansiz": {"ref": "hasan6", "cfg": 0.0},
                    "A2_chatterbox_hasan6": {"ref": "hasan6", "cfg": 0.5},
                    "A3_chatterbox_hasan5_aksansiz": {"ref": "hasan5", "cfg": 0.0}},
-    "voxcpm": {"B1_kuzey_yasli": {"ref": "kuzey", "tarif": YASLI},
+    "voxcpm": {"B1_ses_b_yasli": {"ref": "ses_b", "tarif": YASLI},
                "B2_serdar_yasli": {"ref": "serdar", "tarif": YASLI, "cfg": 2.5},
                "C1_turkce_tarif": {"tarif": "Yetmiş beş yaşında, Anadolulu, bilge bir dede; kalın ve yaşlı, hafif "
                                             "hırıltılı bir sesle, yavaş ve sakin konuşuyor."},
@@ -255,9 +255,9 @@ DENE_ADAYLAR = {
 PARAGRAF = ("Evladım, gel otur şöyle yanıma. Sana gençliğimden bir hikâye anlatayım. O zamanlar köyümüzde ne elektrik "
             "vardı ne de su; ama insanlar birbirine çok yakındı, akşamları hep birlikte oturur, sohbet ederdik.")
 IKI1 = {"chatterbox": {f"iki_{r}": {"ref": r, "cfg": 0.0, "abarti": 0.5, "metin": PARAGRAF}
-                       for r in ("hasan6", "hasan5", "kuzey", "serdar")}}
-IKI2 = {"voxcpm": {**{f"H_{r}_yasli": {"ref": f"iki_{r}", "tarif": YASLI} for r in ("hasan6", "hasan5", "kuzey", "serdar")},
-                   "H_kuzey_yasli_cfg3": {"ref": "iki_kuzey", "tarif": YASLI, "cfg": 3.0}}}
+                       for r in ("hasan6", "hasan5", "ses_b", "serdar")}}
+IKI2 = {"voxcpm": {**{f"H_{r}_yasli": {"ref": f"iki_{r}", "tarif": YASLI} for r in ("hasan6", "hasan5", "ses_b", "serdar")},
+                   "H_ses_b_yasli_cfg3": {"ref": "iki_ses_b", "tarif": YASLI, "cfg": 3.0}}}
 
 
 # Bütün sesler (13.10): aynı iki aşama; 2. aşamanın tarifi sesin bugünkü karakteri (kadrodaki tarif bazı seslerde
@@ -279,7 +279,7 @@ TUM_TARIF = {
     "firfir": "A cunning cartoon fox, smooth sly voice with a nasal twist, witty and flirtatious",
     "kara": "A cartoon villain wizard, low raspy sinister voice, dramatic and theatrical",
 }
-TUM_TARIF = {**kadro.OZEL.get("tarif", {}), **TUM_TARIF}       # ürün sesleri (Damla, Kuzey): kadro._ozel
+TUM_TARIF = {**kadro.OZEL.get("tarif", {}), **TUM_TARIF}       # ürün sesleri (Ses A, Ses B): kadro._ozel
 TUM1 = {"chatterbox": {f"iki_{v}": {"ref": v, "cfg": 0.0, "abarti": 0.5, "metin": NOTR_PARAGRAF} for v in TUM_TARIF}}
 TUM2 = {"voxcpm": {f"{v}_iki": {"ref": f"iki_{v}", "tarif": t} for v, t in TUM_TARIF.items()}}
 IKI_TUR = {"hasan": (IKI1, IKI2, "hasan_iki"), "tum": (TUM1, TUM2, "tum_iki")}

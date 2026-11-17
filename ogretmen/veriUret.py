@@ -31,10 +31,10 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "araclar" / "olcu")
 from olcu import dogruluk, netlik  # noqa: E402
 from yukle import KOK, ogretmen  # noqa: E402
 
-# Seçim 28.09.2026 (dinleti): Damla = damla-4, Kuzey = kuzey-1.
-SESLER = {"damla": "damla-4", "kuzey": "kuzey-1"}
+# Seçim 28.09.2026 (dinleti): Ses A = ses_a-4, Ses B = ses_b-1.
+SESLER = {"ses_a": "ses_a-4", "ses_b": "ses_b-1"}
 KAPI_DOGRULUK, KAPI_NETLIK = 0.90, 18.0
-# hizSecenek.py (git geçmişinde; damla-4, 3 cümle, RTF = üretim / ses süresi):
+# hizSecenek.py (git geçmişinde; ses_a-4, 3 cümle, RTF = üretim / ses süresi):
 #   A referans + devam kaydı, 10 adım  RTF 18,0  doğruluk 1,00
 #   B yalnız referans, 10 adım         RTF 11,4  doğruluk 0,95
 #   C yalnız referans, 6 adım          RTF  7,3  doğruluk 1,00  ← seçildi

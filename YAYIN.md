@@ -13,7 +13,7 @@ gönderildi; depoların herkese açık olup olmadığı buradan görünmüyor. P
   - [x] GitHub (kuruluş `seslen-tr`),
   - PyPI (iki adımlı doğrulama açık),
   - Hugging Face (yazma anahtarı).
-- [ ] **Ürün seslerinin yerel adları ve tarifleri açılmaz.** Damla ve Kuzey adı, tarifi ve kaydı hiçbir açık depoya
+- [ ] **Ürün seslerinin yerel adları ve tarifleri açılmaz.** Ses A ve Ses B adı, tarifi ve kaydı hiçbir açık depoya
   girmez; açık modelin sesleri `ogrenci/aktar/acikAktar.py`'nin verdiği açık adlarla çıkar (eşleme
   `kullanici/ozel_sesler.json`'da, git dışında), `hf/yukle.py` yerel adı görürse reddeder.
 
@@ -67,7 +67,7 @@ python hf/yukle.py --acik     # herkese açık
 bağlanır, kendi cümle listelerini `kullanici/on_kayit/` altına bırakır.
 
 Açılmayanlar (açık depoda yok):
-- **Ürün sesleri Damla ve Kuzey:** tarifleri `kullanici/ozel_sesler.json`'da, kayıtları, stil vektörleri ve
+- **Ürün sesleri Ses A ve Ses B:** tarifleri `kullanici/ozel_sesler.json`'da, kayıtları, stil vektörleri ve
   ağırlıklar `cikti/`'de (ikisi de git dışında). Dosya yoksa Seslen 14 sesle çalışır.
 - **Gerçek kişi verisi:** ses uzayı eşlemeleri (YouTube kimlikleri, gerçek konuşmacıya benzetme) 31.10–01.11'de
   koddan çıktı; havuzu (`veri/havuz`) kullanılmıyor, silinecek. YODAS2 ham kesitleri (`veri/egitim/wavs/yodas`, git
@@ -78,12 +78,15 @@ Açılmayanlar (açık depoda yok):
 
 01.11.2026'da açıldı: **github.com/seslen-tr/seslen** (herkese açık, MIT). Yerelde `acik` dalı açık deponun
 `main`'idir; özel geçmiş hiçbir zaman oraya gönderilmez (`git push ... main` değil). Güncellerken `main`'in ağacından
-`dinleti/` çıkarılıp `acik`'in üstüne tek commit yapılır:
+`dinleti/` çıkarılır, ürün seslerinin yerel adları "Ses A" / "Ses B" (kodda `ses_a` / `ses_b`) olur ve `acik`'in
+üstüne tek commit yapılır; ad kalırsa betik commit kurmaz (18.11.2026'ya dek adlar açık dalda 27 dosyada geçiyordu,
+git geçmişinde kalıyor):
 
 ```
-set GIT_INDEX_FILE=.git\acik-index && git read-tree main && git rm -r -q --cached dinleti
-git commit-tree <git write-tree çıktısı> -p acik -m "..."  →  git update-ref refs/heads/acik <commit>
+python araclar/acikDal.py --dene                       # neyin değişeceği
+python araclar/acikDal.py v3.6.7 mesaj.txt             # commit + acik-v3.6.7 etiketi
 git push https://github.com/seslen-tr/seslen.git acik:main
+git push https://github.com/seslen-tr/seslen.git acik-v3.6.7:refs/tags/v3.6.7
 ```
 
 Açık ses modeli hazır: `Masaüstü/ses_projeleri/seslen-tts`.

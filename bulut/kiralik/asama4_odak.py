@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 """
-ODAK İNCE AYARI (07.10) — tonOlc: Serdar neşeli/kızgın/uyarı ve Damla uyarı/merak nötrden zor ayrılıyor; stil
+ODAK İNCE AYARI (07.10) — tonOlc: Serdar neşeli/kızgın/uyarı ve Ses A uyarı/merak nötrden zor ayrılıyor; stil
 vektörüyle zorlamak doğallığı bozdu (tonDuzelt.py, git geçmişinde). Model o ses × duyguları daha çok görsün diye
 3. aşamanın son ağırlığından 1 kısa tur:
   liste    veri/egitim_vurgu/train_list.txt'ten ağırlıklı liste → veri/egitim_vurgu_odak/
-           (ODAK katsayıları; Serdar'ın ve Damla'nın kalanı + öteki seslerden PROVA kayıt unutmasın diye)
+           (ODAK katsayıları; Serdar'ın ve Ses A'nın kalanı + öteki seslerden PROVA kayıt unutmasın diye)
   ac       makine (4090 / L40S, Secure)
   kur      StyleTTS2 + paketler (asama3_yeni.KURULUM) + paket_egit + odak.sh
   yukle    listedeki wav'lar, liste, t3-epoch_2nd_00002.pth, Türkçe PL-BERT
@@ -27,8 +27,8 @@ from asama3_yeni import KURULUM, gonder  # noqa: E402
 
 KOK = r.KOK
 ODAK = {("serdar", "neseli"): 3, ("serdar", "kizgin"): 3, ("serdar", "uyari"): 3,
-        ("damla", "uyari"): 2, ("damla", "merak"): 2}
-SES_KALAN = {"serdar": None, "damla": 600}      # None: hepsi bir kez
+        ("ses_a", "uyari"): 2, ("ses_a", "merak"): 2}
+SES_KALAN = {"serdar": None, "ses_a": 600}      # None: hepsi bir kez
 PROVA = 5000
 AKIS = 6                                        # paralel SSH yükleme akışı
 HEDEF = KOK / "veri" / "egitim_vurgu_odak"

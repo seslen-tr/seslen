@@ -8,7 +8,7 @@ Havuzlar:
                              uyarı, merak, özür; 700'er) — anlam ile ton uyuşsun
   veri/duygu/j.txt           "j"li nötr cümleler (öğretmen j'de zorlanıyor)
 Yeni ses (varsayılan 2000 cümle, ~1,8 sa): nötr 640 + j 60 + her duygudan 260.
-Damla / Kuzey (nötr verileri Kaggle'dan var): her duygudan 200 + j 60.
+Ses A / Ses B (nötr verileri Kaggle'dan var): her duygudan 200 + j 60.
 Her ses havuzdan KENDİ alt kümesini alır (crc32(ses|metin) sırası): aynı cümle
 birkaç seste olabilir, hepsinde olmaz — metin çeşitliliği artar.
 Kip (ogretmen/kadro.py KIP_NOTR): duygulu → B, nötr → sese göre B/C.
@@ -29,7 +29,7 @@ sys.path.insert(0, str(KOK / "ogretmen"))
 from kadro import KIP_NOTR, secilenler  # noqa: E402
 
 DUYGULAR = ["neseli", "heyecan", "uyari", "merak", "ozur"]
-ESKI = {"damla", "kuzey"}
+ESKI = {"ses_a", "ses_b"}
 YENI_PAY = {"notr": 640, "j": 60, **{d: 260 for d in DUYGULAR}}
 ESKI_PAY = {"j": 60, **{d: 200 for d in DUYGULAR}}
 YENI_DUYGULAR = ["uzgun", "kizgin", "fisilti"]

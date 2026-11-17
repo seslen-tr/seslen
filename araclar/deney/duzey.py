@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 PERDE DÜZEYİ VE GENİŞLİĞİ (02-03.11) — doku.py'nin bulgusu: öğrenciyi öğretmenden ayıran perdenin düzeyi.
-  - Öğrenci cümleyi öğretmenden ortalama 3,3 yarım ton farklı düzeyde okuyor (Kuzey +3,9, Serdar +3,5).
+  - Öğrenci cümleyi öğretmenden ortalama 3,3 yarım ton farklı düzeyde okuyor (Ses B +3,9, Serdar +3,5).
   - Cümleye özgü düzeyi öğretmenle r ≈ 0,5 ilişkili (yönü doğru), ama değişimi yarı genişlikte: cümleler arası
     sapma öğrencide 1,9, öğretmende 3,4 yarım ton (ortalamaya eğitilen tahmincinin düzleşmesi; cesitlilik.py).
 Eğitimsiz iki düzeltme, ses × ton istatistikleri t10 eğitim cümlelerinden (sınama cümleleri değil):

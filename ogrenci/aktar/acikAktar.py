@@ -31,7 +31,7 @@ KOK = Path(__file__).resolve().parents[2]
 sys.path[:0] = [str(KOK / "ogrenci"), str(KOK / "ogretmen")]
 OZEL = KOK / "kullanici" / "ozel_sesler.json"
 _ozel = json.loads(OZEL.read_text(encoding="utf-8")) if OZEL.exists() else {}
-YASAK = set(_ozel.get("kadro", {})) | {"damla", "kuzey"}      # ürün seslerinin yerel adları açık dosyalarda geçmez
+YASAK = set(_ozel.get("kadro", {})) | {"ses_a", "ses_b"}      # ürün seslerinin yerel adları açık dosyalarda geçmez
 ACIK_AD = _ozel.get("acik_ad", {})                            # yerel ad → açık modeldeki ad
 GORUNEN_ACIK = _ozel.get("acik_gorunen", {})
 ACIK_SESLER = [*ACIK_AD, "ayse", "serdar", "zeynep", "emre", "selin", "fatma", "hasan", "elif", "can", "ece",

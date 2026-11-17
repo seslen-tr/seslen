@@ -28,7 +28,7 @@ import numpy as np
 KOK = Path(__file__).resolve().parents[2]
 sys.path[:0] = [str(KOK / "ogrenci"), str(KOK / "ogretmen"), str(KOK / "araclar" / "olcu")]
 SINAV = KOK / "veri" / "sinav"
-SIRA = ["damla", "kuzey", "ayse", "serdar", "zeynep", "emre", "selin", "fatma", "hasan", "elif", "can", "ece",
+SIRA = ["ses_a", "ses_b", "ayse", "serdar", "zeynep", "emre", "selin", "fatma", "hasan", "elif", "can", "ece",
         "pitircik", "koca", "firfir", "kara"]
 KATEGORI = {"sy": "sayı/tarih", "ad": "ad", "so": "soru", "em": "emir/uyarı", "hi": "hitap", "ku": "kısa", "ma": "masal",
             "ur": "ürün", "zo": "zor sözcük", "du": "duygu", "cv": "genel"}

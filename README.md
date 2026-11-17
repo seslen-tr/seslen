@@ -71,7 +71,7 @@ metin hazırlama ([turkce-normalize](https://github.com/seslen-tr/turkce-normali
   cümlede 8). Kusursuz aday ya da aynı cümlenin öğrenci okuyuşundan (çalışan stüdyoya sorulur) kötü olmayan aday
   kayda girer; geçmeyeni öğrenci okumaya devam eder. Aynı konuşmada öğretmen ↔ öğrenci geçişi kulakla fark
   edilmiyor. Sıra boşken işçi önceden doldurur: Seslen'e bağlanan her proje kendi cümlelerini
-  `kullanici/on_kayit/<proje>.tsv` (git dışında; satır `duygu<TAB>cümle`, `{ad}` sesin adı; `# sesler: damla, kuzey`
+  `kullanici/on_kayit/<proje>.tsv` (git dışında; satır `duygu<TAB>cümle`, `{ad}` sesin adı; `# sesler: ses_a, ses_b`
   satırı sesleri sınırlar, yoksa bütün sesler) olarak bırakır. Genel liste önceden üretilmez. Kayıt
   `SESLEN_KAYIT_GB`'a (5) varınca önceden doldurma durur. Kayıt `kullanici/ogretmen_kaydi/` (git dışında; dinlemek için
   `python ogrenci/kayit.py dinle` → `dinle.html`). Okuma ayarları (hız, perde, duygu şiddeti, üslup, tonlama,
@@ -143,7 +143,7 @@ kaydırmadır. Cümleye özgü difüzyon stili (`Ayar.difuzyon`, `model.cumle_st
 
 ## Model
 
-- **Sesler:** yetişkin Damla, Kuzey, Ayşe, Serdar · genç Zeynep, Emre, Selin · yaşlı Fatma nine,
+- **Sesler:** yetişkin Ses A, Ses B, Ayşe, Serdar · genç Zeynep, Emre, Selin · yaşlı Fatma nine,
   Hasan dede · çocuk Elif, Can, Ece · çizgi film Pıtırcık, Koca, Fırfır, Kara. Hepsi tariften
   tasarlandı ([ogretmen/kadro.py](ogretmen/kadro.py)); gerçek bir kişinin sesi değildir.
 - **Tonlar:** nötr, neşeli, heyecan, uyarı, merak, özür, üzgün, kızgın, fısıltı.
@@ -192,16 +192,16 @@ Her duygunun nötrden akustik farkı (perde, perde dalgalanması, güç, hız, s
 1 = öğretmen kadar belirgin: fısıltı 1,06 · neşeli 0,91 · kızgın 0,90 · üzgün 0,88 · özür 0,84 · merak 0,80 ·
 heyecan 0,78 · uyarı 0,63. Yeni eklenen üç duygu (üzgün, kızgın, fısıltı) ötekilerden zayıf değil. Fark sese göre
 değişiyor: Ayşe, Zeynep, Hasan'da duygular öğretmen kadar ya da daha belirgin; Serdar'da neşeli, kızgın ve uyarı
-perdede ayrılıyor ama dalgalanma ve hızda öğretmeni izlemiyor; Damla'da uyarı ve merak zayıf.
+perdede ayrılıyor ama dalgalanma ve hızda öğretmeni izlemiyor; Ses A'da uyarı ve merak zayıf.
 
 **Serdar'ın zayıf duyguları neden düzelmiyor** (08.10.2026). İki deneme sonuç vermedi: stil vektörünü öğretmenin
 en belirgin kayıtlarından seçmek/itmek (`tonDuzelt.py`, git geçmişinde) doğallığı bozdu; zayıf ses ×
 duygular ağırlıklı 1 kısa tur ince ayar ([bulut/kiralik/asama4_odak.py](bulut/kiralik/asama4_odak.py), 3,2 $,
 `t4-epoch_2nd_00000.pth`) ortalamayı az artırdı (özür 0,84→0,93, fısıltı 1,06→1,12) ama Serdar'ı kıpırdatmadı ve
-nötrde UTMOS 3,03→2,97, Damla'da bir cümle başı hatası ("Kai seri") getirdi → varsayılan t3'te kaldı
+nötrde UTMOS 3,03→2,97, Ses A'da bir cümle başı hatası ("Kai seri") getirdi → varsayılan t3'te kaldı
 (`modelKarsilastir.py`, git geçmişinde; `dinleti/model.html`). Sebep veride: öğretmen (VoxCPM2)
 Serdar'ın "kalın, otoriter, sakin" kimlik kaydını tarife baskın tutmuş. Öğretmen kayıtlarında duygunun nötrden
-ayrışması (etki büyüklüğü, 25 cümle): neşeli Serdar 0,74 · Hasan 1,58 · Kuzey 1,85 · Damla 2,54; uyarı 1,11 / 1,62 /
+ayrışması (etki büyüklüğü, 25 cümle): neşeli Serdar 0,74 · Hasan 1,58 · Ses B 1,85 · Ses A 2,54; uyarı 1,11 / 1,62 /
 1,28 / 2,13. Öğrenci veride olmayanı öğrenemez; çözüm Serdar'ın duygulu cümlelerini öğretmene daha güçlü tarifle
 ya da duygulu bir kimlik kaydıyla yeniden ürettirmek. Ayrıca kalın seste pyin perde ölçümü oynak (6 cümlede neşeli
 −3, 25 cümlede +1,2 yarım ton): Serdar'ın tonOlc oranları güvenilir değil.
@@ -212,16 +212,16 @@ yeniden okundu (o günkü `kaggleIs.py serdar`; bugün `kaggleIs.py yeniden`, 45
 nötrden ayrışma: neşeli 1,38 → 4,10, uyarı 1,67 → 3,20. 3. aşamadan 1 kısa tur ince ayar
 (o günkü `serdarYeniden.py`, git geçmişinde; bugün [bulut/kiralik/yenile.py](bulut/kiralik/yenile.py), 3,2 $, `t5-epoch_2nd_00000.pth`, doğrulama kaybı
 0,290): öğrenci Serdar'ın nötrden perde farkı neşeli +2,7 → +5,1, uyarı +2,0 → +4,6 yarım ton. Öteki seslerde kazanç
-yok, Damla'da "Kayseri" bölündü → stüdyoda yalnız Serdar t5 ile konuşur (`studyo.SES_AGIRLIK`).
+yok, Ses A'da "Kayseri" bölündü → stüdyoda yalnız Serdar t5 ile konuşur (`studyo.SES_AGIRLIK`).
 
 **Soru ezgisi ve kalan zayıflar** (09.10.2026, [araclar/deney/zayifTeshis.py](araclar/deney/zayifTeshis.py), 25 cümle). Merakın
 asıl işareti Türkçe evet/hayır sorusunda soru ekinden önceki sözcüğün vurgulu hecesindeki tepedir ("olaBİLİR misin?",
-"ANkara mı?"). Öğretmen yapıyor (tepe Damla +3, Kuzey/Zeynep +4,5 yarım ton), öğrenci düz geçiyordu (Damla'da sonu
+"ANkara mı?"). Öğretmen yapıyor (tepe Ses A +3, Ses B/Zeynep +4,5 yarım ton), öğrenci düz geçiyordu (Ses A'da sonu
 düşürüyordu). Çözüm kural: `model.soru_egrisi` turkce-vurgu'nun vurgu işaretinden o heceyi bulur, F0'a `SORU_TEPE` (6)
 yarım ton ekler (çözücüde ~175 ms yumuşatılır; ONNX'te `egri` girdisi). Soru sözcüklü sorulara dokunmaz.
 [araclar/deney/soruOlc.py](araclar/deney/soruOlc.py), 6 ses × 12 soru: tepe −1,7..+0,7 → +0,6..+2,9; UTMOS en çok −0,08;
 anlaşılırlık aynı (`dinleti/soru.html`). Serdar'ın merakı da böylece duyulur (öğretmen verisinde merak yok, 0,36).
-Damla'nın uyarısı aslında öğrenilmişti (6 cümlelik tonOlc yanıltmış): perde +1,4 / öğretmen +2,1; uyarı ve merakta stil
+Ses A'nın uyarısı aslında öğrenilmişti (6 cümlelik tonOlc yanıltmış): perde +1,4 / öğretmen +2,1; uyarı ve merakta stil
 nötrden 1,4 kat uzaklaştırılır (`studyo.TON_KAZANC`; UTMOS değişmedi).
 
 **Hız** (i7-12700H, 6 iş parçacığı): RTF ≈ 0,22 (1 sn ses ≈ 0,22 sn); stüdyoda ilk cümle ≈ 0,9 sn.
@@ -269,7 +269,7 @@ benzerliği, MCD: göreli mel-kepstrum uzaklığı).
 
 - **Çözücü yeterli; fark perdede.** Öğretmenin perdesi verilince öğrenci öğretmene, öğretmenin kendi başka kaydından
   daha çok benziyor. Pürüzsüz perde de aynı işi görüyor: ince oynama değil, **düzey** önemli.
-- **Düzey:** öğrenci cümleyi öğretmenden ortalama 3,3 yarım ton farklı düzeyde okuyor (Kuzey +3,9, Serdar +3,5).
+- **Düzey:** öğrenci cümleyi öğretmenden ortalama 3,3 yarım ton farklı düzeyde okuyor (Ses B +3,9, Serdar +3,5).
   Cümleye özgü düzeyi öğretmenle r ≈ 0,5 ilişkili (yönü doğru), ama değişimi yarı genişlikte: cümleler arası sapma
   öğrencide 1,9, öğretmende 3,4 yarım ton (ortalamaya eğitilen tahmincinin düzleşmesi).
 - **Eğitimsiz düzeltmeler** ([araclar/deney/duzey.py](araclar/deney/duzey.py), [araclar/deney/cesitlilik.py](araclar/deney/cesitlilik.py)):
@@ -415,4 +415,4 @@ python ogrenci/dinle.py cikti/ogrenci/t6-epoch_2nd_00000.pth       # t6-stiller.
 python ogrenci/aktar/onnxAktar.py cikti/ogrenci/t6-epoch_2nd_00000.pth   # t6-ses.onnx
 ```
 
-Masraf, takvim ve öğrenci seçiminin gerekçesi: [YOL.md](YOL.md). Seslen kodu MIT ([LICENSE](LICENSE)); kullanılan modellerin ve verilerin lisansları: [LISANSLAR.md](LISANSLAR.md). Ürün sesleri Damla ve Kuzey açık depoda yoktur (`kullanici/ozel_sesler.json` ile eklenir).
+Masraf, takvim ve öğrenci seçiminin gerekçesi: [YOL.md](YOL.md). Seslen kodu MIT ([LICENSE](LICENSE)); kullanılan modellerin ve verilerin lisansları: [LISANSLAR.md](LISANSLAR.md). Ürün sesleri Ses A ve Ses B açık depoda yoktur (`kullanici/ozel_sesler.json` ile eklenir).

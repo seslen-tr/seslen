@@ -78,11 +78,11 @@ def son_agirlik() -> Path:
 # Sese özel ağırlık. 09.10'dan t10'a dek Serdar t5 ile konuşuyordu (güçlü tarifli duygu verisi); t10'da Serdar da 1. yol
 # verisiyle eğitildi ve onaylanan dinleme tek ağırlıkla yapıldı → boş.
 SES_AGIRLIK: dict[str, str] = {}
-# Ses × ton kazancı (09.10): Damla'nın uyarısı öğretmenin perde yükselişinin ~2/3'ünde kalıyordu (+1,4 / +2,1 yarım
+# Ses × ton kazancı (09.10): Ses A'nın uyarısı öğretmenin perde yükselişinin ~2/3'ünde kalıyordu (+1,4 / +2,1 yarım
 # ton, araclar/deney/zayifTeshis.py). Stil vektörünü nötrden 1,4 kat uzaklaştırmak öğretmene yaklaştırıyor; UTMOS değişmedi
 # (1,0: 3,24 · 1,3: 3,26 · 1,5: 3,18), anlaşılırlık aynı. Merakta da aynı (perde +1,5 → +2,0, öğretmen +2,6; soru
 # tepesi +1,9 → +2,4; UTMOS 2,68 → 2,66). Duygu şiddeti kaydırıcısı bunun üstüne çarpar.
-TON_KAZANC = {("damla", "uyari"): 1.4, ("damla", "merak"): 1.4}
+TON_KAZANC = {("ses_a", "uyari"): 1.4, ("ses_a", "merak"): 1.4}
 # BELGE OKUMA (03.11): makaleler Markdown'dı; işaretler okundu, tablo tek cümle oldu, duygu cümle cümle sıçradı
 # ("izin gerekmez" kızgın), hız 4,6–7,3 hece/sn oynadı. Biçimli metin turkce_normalize.okunur_metin ile cümle yapısına
 # çevrilir; bu üsluplarda duygu sabit ve hafif (güçlü duygu yok, belirsizse nötr, en çok BELGE_YOGUNLUK); kısa cümle

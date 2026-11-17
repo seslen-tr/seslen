@@ -31,7 +31,7 @@ Cümle cümle akış olduğu için ilk ses ~0,5-1 sn'de başlar. int8 ONNX ile
 
 14 ses, hepsi 6 duyguyla (nötr, neşeli, heyecan, uyarı, merak, özür):
 
-- yetişkin: Damla, Kuzey, Ayşe (olgun kadın), Serdar (olgun erkek, kalın)
+- yetişkin: Ses A, Ses B, Ayşe (olgun kadın), Serdar (olgun erkek, kalın)
 - genç: Zeynep, Emre · yaşlı: Fatma nine, Hasan dede
 - çocuk: Elif, Can
 - çizgi film (özgün): Pıtırcık (minik tiz), Koca (iri kalın), Fırfır (kurnaz tilki), Kara (kötü büyücü)
@@ -59,7 +59,7 @@ RTX 4090 ~0,35-0,70 $/sa, A100 80 GB ~0,8-1,4 $/sa.
 | Aday sesler (36 aday) | Kaggle | ~1 | 0 |
 | Öğretmen verisi: 12 yeni ses × ~2000 cümle (~21 sa ses, 2 aday) | 4090 (VoxCPM2 RTF ~0,3 bf16) | ~15-20 | ~10 $ |
 | Türkçe PL-BERT (tonlama için metin modeli; Vikipedi + bizim G2P) | 4090 | ~15-25 | ~10-20 $ |
-| Pilot eğitim (Damla, Kuzey + 2 ses; kalite kapısı) | A100 | ~30 | ~30-40 $ |
+| Pilot eğitim (Ses A, Ses B + 2 ses; kalite kapısı) | A100 | ~30 | ~30-40 $ |
 | Tam eğitim (14 ses, ~30 sa veri) | A100 | ~150-250 | ~150-300 $ |
 | **Toplam** | | | **~200-370 $** (beklenen ~250 $) |
 

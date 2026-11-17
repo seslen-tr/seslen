@@ -21,7 +21,7 @@ import soundfile as sf
 
 KOK = Path(__file__).resolve().parents[2]
 sys.path[:0] = [str(KOK / "ogrenci"), str(KOK / "ogretmen")]
-HEDEF = [("damla", "uyari"), ("damla", "merak"), ("serdar", "merak")]
+HEDEF = [("ses_a", "uyari"), ("ses_a", "merak"), ("serdar", "merak")]
 OZ = ["perde", "dalga", "guc", "hiz", "son"]
 N = 25
 

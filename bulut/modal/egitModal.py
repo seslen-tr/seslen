@@ -169,7 +169,7 @@ def yukle() -> None:
         var = {e.path.removeprefix("wavs/"): e.size for e in hacim.iterdir("wavs", recursive=True)}
     except Exception:
         pass
-    # boyutla: yeni sesin aynı adlı kaydı (t10 Damla ne0151.flac) eskisinin yerine geçsin
+    # boyutla: yeni sesin aynı adlı kaydı (t10 Ses A ne0151.flac) eskisinin yerine geçsin
     eksik = [w for w in tek if var.get(w) != (wavs / w).stat().st_size]
     print(f"{len(tek)} wav, hacimde {len(tek) - len(eksik)}; gönderilecek {len(eksik)}", flush=True)
     gecici = KOK / "cikti" / "modal_tar"

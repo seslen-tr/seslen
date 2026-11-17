@@ -4,7 +4,7 @@ VERİ YENİLEME + İNCE AYAR (10.10) — dinlemede yakalanan üç kalıcı sorun
   1. Fatma nineye benzemiyordu (öğretmen kaydının perdesi 323 Hz, genç kız): yeni tasarım fatma-5 (231 Hz, hırıltılı)
      seçildi; Fatma'nın bütün verisi bu sesle yeniden okunur. Hırıltı netlik ölçüsünü düşürür (17-18): kapı 15.
   2. Kısa cümleler bozuluyordu ("Sınavı geçtim!" → "sınava"): verinin %0,3'ü 1-2 sözcüktü. veri/kisa_cumleler.tsv
-     (245 cümle) açık sesler + Damla, Kuzey, Serdar tarafından okunur; masal dili için veri/masal_cumleler.tsv.
+     (245 cümle) açık sesler + Ses A, Ses B, Serdar tarafından okunur; masal dili için veri/masal_cumleler.tsv.
   3. Vurgu (turkce-vurgu 0.1.1: VARmış, acele ETme): bütün listeler yeniden okunuşlanır (ogrenci/veri/vurguListe.py).
 Ardından 3. aşama ağırlığından (t3) bir tur ince ayar → t6 (asama4_odak'ın makine adımları).
   4. (11.10, t7) Hasan'ın telaffuzu iki modelde de sorunluydu, öğretmen perdesi 246 Hz: yeni tasarım hasan-6 (165 Hz)
@@ -41,7 +41,7 @@ KOK = r.KOK
 PLAN = KOK / "veri" / "plan_yeniden"
 # yeni: verisi baştan okunan ses → seçilen aday; kisa: kısa/masal cümleleri bu turda okunacak öteki sesler
 TURLAR = {
-    "t6": {"yeni": {"fatma": "fatma-5"}, "kisa": ["ayse", "zeynep", "emre", "hasan", "koca", "damla", "kuzey", "serdar"],
+    "t6": {"yeni": {"fatma": "fatma-5"}, "kisa": ["ayse", "zeynep", "emre", "hasan", "koca", "ses_a", "ses_b", "serdar"],
            "kapi_netlik": {"fatma": 15.0}, "baslangic": "t3-epoch_2nd_00002.pth", "prova": 5000},
     "t7": {"yeni": {"hasan": "hasan-6"}, "kisa": [], "kapi_netlik": {}, "baslangic": "t6-epoch_2nd_00000.pth",
            "prova": 4000},
@@ -50,8 +50,8 @@ TURLAR = {
            "ek": KOK / "veri" / "egitim_vurgu_on" / "yodas.txt"},
 }
 # 15.10 seçim sayfası (araclar/deney/yolKarsilastir.py): 11 ses "1. yol" (Chatterbox Türkçesi + VoxCPM2 tarif), Can
-# yeni erkek çocuk (kaggleIs CAN, aday A). Verileri baştan D kipiyle (bulut/kaggle/yeniden.py) okunur; Damla, Elif,
-# Kara, Kuzey eski verileriyle kalır (Kuzey'in uzay sesi eğitimden sonra sesUzayi.py ile, git geçmişinde). 22 sa YODAS2 ön eğitimle.
+# yeni erkek çocuk (kaggleIs CAN, aday A). Verileri baştan D kipiyle (bulut/kaggle/yeniden.py) okunur; Ses A, Elif,
+# Kara, Ses B eski verileriyle kalır (Ses B'nin uzay sesi eğitimden sonra sesUzayi.py ile, git geçmişinde). 22 sa YODAS2 ön eğitimle.
 _YOL1 = {s: (f"cikti/kaggle/dene/ref/iki_{s}.wav", s) for s in
          ("ayse", "serdar", "zeynep", "emre", "selin", "fatma", "ece", "pitircik", "koca", "firfir")}
 _YOL1 |= {"hasan": ("cikti/kaggle/dene/ref/iki_serdar.wav", "YASLI"), "can": ("cikti/kaggle/dene/ref/iki_emre.wav", "OGLAN")}
@@ -62,15 +62,15 @@ TURLAR["t9"] = {"yeni": {s: f"{s}-yol1" for s in _YOL1}, "yol1": _YOL1, "kisa": 
                 "tamam": ["ayse", "emre", "koca", "fatma", "firfir", "selin"], "adet_kalan": 700, "ilk_parca": 3,
                 "parca_kalan": 2,
                 "ek": KOK / "veri" / "egitim_vurgu_on" / "yodas.txt", "ek_adet": 8000}   # ~18 bin adım: 4090da ~12 sa
-# 19-20.10 dinleme: t9'da bütün seslerde 1. yol seçildi (Elif şimdiki). Damla, Kuzey, Kara 1. yol sesine geçer; Can
-# daha ince G sesine (kaggleIs.OGLAN8). Damla ve Kuzey ürünün sabit cümlelerini de okur (31.10'dan beri kullanici/on_kayit/cbs_portal_urun.tsv): eğitim
+# 19-20.10 dinleme: t9'da bütün seslerde 1. yol seçildi (Elif şimdiki). Ses A, Ses B, Kara 1. yol sesine geçer; Can
+# daha ince G sesine (kaggleIs.OGLAN8). Ses A ve Ses B ürünün sabit cümlelerini de okur (31.10'dan beri kullanici/on_kayit/cbs_portal_urun.tsv): eğitim
 # verisi + sunucu önbelleği için öğretmen kaydı. Kaggle parça 6-7; birleştirme yalnız bu turun parçalarından.
-TURLAR["t10"] = {"yeni": {s: f"{s}-yol1" for s in ("damla", "kuzey", "kara", "can")},
-                 "yol1": {"damla": ("cikti/kaggle/dene/ref/iki_damla.wav", "damla"),
-                          "kuzey": ("cikti/kaggle/dene/ref/iki_kuzey.wav", "kuzey"),
+TURLAR["t10"] = {"yeni": {s: f"{s}-yol1" for s in ("ses_a", "ses_b", "kara", "can")},
+                 "yol1": {"ses_a": ("cikti/kaggle/dene/ref/iki_ses_a.wav", "ses_a"),
+                          "ses_b": ("cikti/kaggle/dene/ref/iki_ses_b.wav", "ses_b"),
                           "kara": ("cikti/kaggle/dene/ref/iki_kara.wav", "kara"),
                           "can": ("cikti/kaggle/dene/ref/can_a_p3.wav", "OGLAN8")},
-                 "sabit": ["damla", "kuzey"], "kisa": [], "kapi_netlik": {"can": 15.0}, "adet": 900, "parca": 2, "ilk_parca": 6,  # RunPod: 3 parça
+                 "sabit": ["ses_a", "ses_b"], "kisa": [], "kapi_netlik": {"can": 15.0}, "adet": 900, "parca": 2, "ilk_parca": 6,  # RunPod: 3 parça
                  "parcalar": [8, 9], "baslangic": "t9-epoch_2nd_00000.pth", "prova": 2000,   # Modal kalan kredisi: ~5.500 adım
                  "ek": KOK / "veri" / "egitim_vurgu_on" / "yodas.txt", "ek_adet": 1000}
 TUR = "t10"

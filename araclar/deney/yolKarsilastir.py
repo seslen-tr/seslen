@@ -23,7 +23,7 @@ import kadro  # noqa: E402
 
 T = KOK / "cikti" / "teshis"
 H = T / "karsilastirma"
-SIRA = ["damla", "kuzey", "ayse", "serdar", "zeynep", "emre", "selin", "fatma", "hasan", "elif", "can", "ece",
+SIRA = ["ses_a", "ses_b", "ayse", "serdar", "zeynep", "emre", "selin", "fatma", "hasan", "elif", "can", "ece",
         "pitircik", "koca", "firfir", "kara"]
 AD = {"ayse": "Ayşe", "pitircik": "Pıtırcık", "firfir": "Fırfır"}
 # 19.10: seçimden sonra eğitilen t9 eklendi; 1. yol artık hedef (öğretmen), 2. yol aynı ses sütunu çıkarıldı

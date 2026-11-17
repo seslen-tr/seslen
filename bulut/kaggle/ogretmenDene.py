@@ -9,7 +9,7 @@ cümleleri (kadro.DENEME) farklı yollarla üretip kulakla karşılaştırmak i�
 voxcpm'e referans olur ve tarifle yaşlandırılır. Aksan Chatterbox'tan, ses rengi ve yaş VoxCPM2'den; gerçek kişi yok.
 AYAR: {"motor": "chatterbox" | "voxcpm", "adaylar": {ad: {...}}}
   chatterbox aday: {"ref": "hasan6", "cfg": 0.0, "abarti": 0.5}
-  voxcpm aday:     {"ref": "kuzey", "tarif": "...", "cfg": 2.0}  ya da  {"tarif": "..."} (tasarım: 00 kimlik olur)
+  voxcpm aday:     {"ref": "ses_b", "tarif": "...", "cfg": 2.0}  ya da  {"tarif": "..."} (tasarım: 00 kimlik olur)
 Girdi (özel veri seti "seslen-dene"): ref/<ad>.wav, kadro.py, olcu.py. Çıktı: /kaggle/working/dene/<aday>/NN.flac + olcum.json
 """
 

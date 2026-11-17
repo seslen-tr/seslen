@@ -8,7 +8,7 @@ gönderir). Girdi: özel Kaggle veri seti "sesatolye-girdi" (paketle.py yapar):
 Çıktı: /kaggle/working/veri/<karakter>/wavs/<kimlik>.flac + olcum.jsonl
 (indir.py bilgisayara çeker, cikti/veri/ ile birleştirir).
 
-ayar.json: {"bas": 0, "son": 20, "adim": 6, "sesler": ["damla", "kuzey"],
+ayar.json: {"bas": 0, "son": 20, "adim": 6, "sesler": ["ses_a", "ses_b"],
             "sure_dk": 690}
 İki GPU varsa (T4×2) VoxCPM2 birinde, Whisper öbüründe koşar.
 Kapı yereldekiyle aynı (ogretmen/veriUret.py): doğruluk ≥ 0,90, netlik ≥ 18.

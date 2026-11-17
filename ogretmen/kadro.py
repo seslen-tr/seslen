@@ -98,7 +98,7 @@ KADRO: dict[str, dict] = {
 
 
 def _ozel() -> dict:
-    """Ürün sesleri (Damla, Kuzey) açık depoda yok: tarifleri kullanici/ozel_sesler.json'da (git dışında). Dosya varsa
+    """Ürün sesleri (Ses A, Ses B) açık depoda yok: tarifleri kullanici/ozel_sesler.json'da (git dışında). Dosya varsa
     kadronun başına eklenir; yoksa atölye bu iki ses olmadan çalışır."""
     import json
     from pathlib import Path
@@ -144,8 +144,8 @@ TAZELE_METIN = ("Merhaba, ben buradayım. Bugün haritada birlikte çalışacağ
 #                   hece sızdırıyor; kapı + 2 aday bunları eler).
 # Seçim kuralı (kullanıcı: "Whisper'a takılmayanlar arasında sen seç"): nötr
 # cümlelerde B ile C'den (kapıdan geçen, doğruluk, netlik) sırasıyla iyi olan.
-# Damla: kullanıcı da C'yi daha iyi buldu.
-KIP_NOTR = {"damla": "C", "kuzey": "C", "ayse": "C", "serdar": "B", "zeynep": "C", "emre": "B", "selin": "B",
+# Ses A: kullanıcı da C'yi daha iyi buldu.
+KIP_NOTR = {"ses_a": "C", "ses_b": "C", "ayse": "C", "serdar": "B", "zeynep": "C", "emre": "B", "selin": "B",
             "fatma": "C", "hasan": "B", "elif": "B", "can": "C", "ece": "C", "pitircik": "B", "koca": "C",
             "firfir": "C", "kara": "C"}
 

@@ -45,10 +45,10 @@ _REF = KOK / "cikti" / "kaggle" / "dene" / "ref"
 # ses → (kimlik kaydı, karakter tarifi); bulut/kiralik/yenile.py TURLAR["t9"/"t10"]["yol1"] ile aynı
 OGRETMEN_SES = {s: (_REF / f"iki_{s}.wav", s) for s in
                 ("ayse", "serdar", "zeynep", "emre", "selin", "fatma", "ece", "pitircik", "koca", "firfir",
-                 "damla", "kuzey", "kara")}
+                 "ses_a", "ses_b", "kara")}
 OGRETMEN_SES |= {"hasan": (_REF / "iki_serdar.wav", "YASLI"), "can": (_REF / "can_a_p3.wav", "OGLAN8")}
 # Boş vakit: sıra boşken bağlanan projelerin bildirdiği cümleler önceden üretilir: kullanici/on_kayit/*.tsv (git
-# dışında). Satır: duygu<TAB>cümle; {ad} sesin adıyla dolar. "# sesler: damla, kuzey" satırı listeyi o seslerle
+# dışında). Satır: duygu<TAB>cümle; {ad} sesin adıyla dolar. "# sesler: ses_a, ses_b" satırı listeyi o seslerle
 # sınırlar (yoksa bütün sesler). "Belki lazım olur" diye genel liste üretilmez (01.11: işlemci boşa gidiyordu).
 # Kayıt SINIR_GB'a varınca boş vakit üretimi durur (sıradaki gerçek cümleler sürer). Cümle başına ~65 KB (24 kHz FLAC).
 SINIR_GB = float(os.environ.get("SESLEN_KAYIT_GB", "5"))
@@ -270,7 +270,7 @@ def ogrenci_cezasi(oz, ses: str, ton: str, cumle: str, hedef: str) -> float | No
 
 
 def sabit(kok: Path = KAYIT) -> None:
-    """Bir ürünün sabit cümleleri (bugün kullanici/on_kayit/cbs_portal_urun.tsv) Damla ve Kuzey için öğretmenle zaten
+    """Bir ürünün sabit cümleleri (bugün kullanici/on_kayit/cbs_portal_urun.tsv) Ses A ve Ses B için öğretmenle zaten
     okundu ve denetimden geçti
     (Kaggle seslen-yeniden-uretim-8, sb###): kayda alınır."""
     import librosa
@@ -279,7 +279,7 @@ def sabit(kok: Path = KAYIT) -> None:
     bitti = {json.loads(x)["anahtar"] for x in (kok / "dizin.jsonl").read_text(encoding="utf-8").splitlines()
              if x} if (kok / "dizin.jsonl").exists() else set()
     say = 0
-    for ses in ("damla", "kuzey"):
+    for ses in ("ses_a", "ses_b"):
         d = KOK / "cikti" / "kaggle" / "indirilen" / "seslen-yeniden-uretim-8" / "veri" / ses
         for r in map(json.loads, (d / "olcum.jsonl").read_text(encoding="utf-8").splitlines()):
             if not r["kimlik"].startswith("sb") or not r["gecti"] or r["denetim"]:

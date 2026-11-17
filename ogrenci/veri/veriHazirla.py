@@ -19,7 +19,7 @@ Metin ogrenci/g2p.py ile IPA'ya çevrilir.
   OOD_texts.txt                  eğitimde olmayan derlem cümleleri (SLM çekişmeli adım)
   konusmacilar.json, ozet.json   no ↔ ses, ses × duygu dakikaları, kayıt → duygu
 
-    python ogrenci/veri/veriHazirla.py [--sesler damla,serdar,…] [--is 8]
+    python ogrenci/veri/veriHazirla.py [--sesler ses_a,serdar,…] [--is 8]
 """
 from __future__ import annotations
 

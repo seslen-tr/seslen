@@ -25,7 +25,7 @@ import soundfile as sf
 
 KOK = Path(__file__).resolve().parents[2]
 sys.path[:0] = [str(KOK / "ogrenci"), str(KOK / "ogretmen")]
-SESLER = ["damla", "kuzey", "ayse", "serdar", "zeynep", "hasan"]
+SESLER = ["ses_a", "ses_b", "ayse", "serdar", "zeynep", "hasan"]
 TONLAR = ["notr", "neseli", "heyecan", "uyari", "merak", "ozur", "uzgun", "kizgin", "fisilti"]
 ADET = 6
 OZ = ["perde", "dalga", "guc", "hiz", "seslilik"]

@@ -43,7 +43,7 @@ KOK = Path(__file__).resolve().parents[1]
 sys.path[:0] = [str(KOK / "ogrenci"), str(KOK / "ogretmen")]
 from studyo import Ayar, Studyo, etiketsiz, okunus  # noqa: E402
 
-GORUNEN = {"damla": "Damla", "kuzey": "Kuzey", "ayse": "Ayşe", "serdar": "Serdar", "zeynep": "Zeynep",
+GORUNEN = {"ses_a": "Ses A", "ses_b": "Ses B", "ayse": "Ayşe", "serdar": "Serdar", "zeynep": "Zeynep",
            "emre": "Emre", "selin": "Selin", "fatma": "Fatma nine", "hasan": "Hasan dede", "elif": "Elif",
            "can": "Can", "ece": "Ece", "pitircik": "Pıtırcık", "koca": "Koca", "firfir": "Fırfır", "kara": "Kara"}
 TONLAR = {"notr": "nötr", "neseli": "neşeli", "heyecan": "heyecan", "uyari": "uyarı", "merak": "merak",
